@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Garvin · Math × Code</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+/* ── Reset & Base ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans SC",sans-serif;
+  background:#0a0a0a;color:#e0e0e0;line-height:1.6;overflow-x:hidden
+}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+section{padding:100px 24px}
+.container{max-width:1100px;margin:0 auto}
+
+/* ── Typography ── */
+h2{
+  font-size:clamp(1.75rem,4vw,2.5rem);
+  font-weight:700;
+  margin-bottom:48px;
+  text-align:center;
+  letter-spacing:-0.02em
+}
+h2 .accent{color:#6c63ff}
+.section-sub{
+  text-align:center;
+  color:#888;
+  font-size:1.05rem;
+  margin-top:-36px;
+  margin-bottom:56px
+}
+
+/* ── Scroll Reveal ── */
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .6s ease,transform .6s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+/* ── Nav ── */
+nav{
+  position:fixed;top:0;left:0;width:100%;
+  z-index:1000;
+  backdrop-filter:blur(12px);
+  background:rgba(10,10,10,.75);
+  border-bottom:1px solid rgba(255,255,255,.06);
+  padding:0 24px
+}
+.nav-inner{
+  display:flex;justify-content:space-between;align-items:center;
+  max-width:1100px;margin:0 auto;height:64px
+}
+.nav-logo{font-weight:700;font-size:1.2rem;color:#fff;letter-spacing:-.02em}
+.nav-links{display:flex;gap:32px;list-style:none}
+.nav-links a{
+  font-size:.9rem;color:#aaa;transition:color .25s;
+  position:relative
+}
+.nav-links a::after{
+  content:'';position:absolute;bottom:-4px;left:0;width:0;height:2px;
+  background:#6c63ff;transition:width .25s
+}
+.nav-links a:hover{color:#fff}
+.nav-links a:hover::after{width:100%}
+.nav-toggle{display:none;background:none;border:none;color:#fff;font-size:1.5rem;cursor:pointer}
+
+/* ── Hero ── */
+.hero{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  text-align:center;padding-top:80px;position:relative;overflow:hidden
+}
+.hero-bg{
+  position:absolute;inset:0;z-index:0;
+  background-image:
+    linear-gradient(rgba(108,99,255,.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(108,99,255,.03) 1px,transparent 1px);
+  background-size:60px 60px;
+  mask-image:radial-gradient(ellipse 60% 60% at center,black 30%,transparent 70%);
+  -webkit-mask-image:radial-gradient(ellipse 60% 60% at center,black 30%,transparent 70%)
+}
+.hero-content{position:relative;z-index:1;max-width:700px}
+.hero-badge{
+  display:inline-block;
+  padding:6px 18px;border-radius:100px;
+  font-size:.8rem;letter-spacing:.04em;
+  background:rgba(108,99,255,.12);color:#6c63ff;
+  border:1px solid rgba(108,99,255,.2);
+  margin-bottom:24px
+}
+.hero h1{
+  font-size:clamp(3rem,8vw,5rem);
+  font-weight:800;color:#fff;
+  letter-spacing:-.03em;line-height:1.1;
+  margin-bottom:20px
+}
+.hero h1 .highlight{
+  background:linear-gradient(135deg,#6c63ff,#a78bfa);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text
+}
+.hero-tagline{
+  font-size:clamp(1.1rem,2.5vw,1.35rem);
+  color:#999;
+  margin-bottom:40px;
+  max-width:520px;margin-left:auto;margin-right:auto
+}
+.hero-buttons{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:14px 32px;border-radius:8px;
+  font-weight:600;font-size:.95rem;
+  transition:all .25s;cursor:pointer;border:none
+}
+.btn-primary{
+  background:#6c63ff;color:#fff
+}
+.btn-primary:hover{
+  background:#5b52e0;transform:translateY(-2px);
+  box-shadow:0 8px 24px rgba(108,99,255,.3)
+}
+.btn-outline{
+  background:transparent;color:#ccc;
+  border:1px solid rgba(255,255,255,.15)
+}
+.btn-outline:hover{
+  border-color:#6c63ff;color:#fff;transform:translateY(-2px)
+}
+.hero-scroll{
+  position:absolute;bottom:40px;left:50%;transform:translateX(-50%);
+  color:#555;font-size:.8rem;letter-spacing:.08em;
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  animation:float 2.5s ease-in-out infinite
+}
+.hero-scroll i{font-size:1rem}
+@keyframes float{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(6px)}}
+
+/* ── About ── */
+.about-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center
+}
+.about-text p{
+  color:#aaa;font-size:1.05rem;margin-bottom:16px
+}
+.about-text p:last-child{margin-bottom:0}
+.about-avatar{
+  display:flex;justify-content:center;align-items:center
+}
+.avatar-frame{
+  width:280px;height:280px;border-radius:50%;
+  position:relative;
+  background:linear-gradient(135deg,#6c63ff20,#a78bfa10);
+  border:2px solid rgba(108,99,255,.15);
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden
+}
+.avatar-frame svg{width:70%;height:70%}
+.avatar-ring{
+  position:absolute;inset:-4px;
+  border-radius:50%;
+  border:1px dashed rgba(108,99,255,.25);
+  animation:spin 30s linear infinite
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Skills ── */
+.skills-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(130px,1fr));
+  gap:24px
+}
+.skill-card{
+  background:#1a1a1a;border-radius:12px;
+  padding:28px 16px;text-align:center;
+  border:1px solid rgba(255,255,255,.04);
+  transition:all .3s;cursor:default
+}
+.skill-card:hover{
+  border-color:rgba(108,99,255,.25);
+  background:#1e1e1e;
+  transform:translateY(-4px);
+  box-shadow:0 8px 24px rgba(108,99,255,.08)
+}
+.skill-card i,.skill-card .svg-icon{
+  font-size:2.2rem;color:#6c63ff;margin-bottom:12px
+}
+.skill-card .skill-label{
+  display:block;font-size:.85rem;color:#aaa;font-weight:500
+}
+
+/* ── Projects ── */
+.projects-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:28px
+}
+.project-card{
+  background:#1a1a1a;border-radius:16px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.04);
+  transition:all .35s
+}
+.project-card:hover{
+  border-color:rgba(108,99,255,.2);
+  transform:translateY(-6px);
+  box-shadow:0 12px 32px rgba(108,99,255,.06)
+}
+.project-thumb{
+  aspect-ratio:16/10;
+  background:linear-gradient(135deg,#151515,#1f1f2e);
+  display:flex;align-items:center;justify-content:center;
+  font-size:2.5rem;color:rgba(108,99,255,.3)
+}
+.project-body{padding:24px}
+.project-body h3{font-size:1.1rem;font-weight:600;color:#fff;margin-bottom:8px}
+.project-body p{font-size:.9rem;color:#888;margin-bottom:16px}
+.project-tag{
+  display:inline-block;padding:4px 12px;border-radius:100px;
+  font-size:.75rem;font-weight:500;
+  background:rgba(108,99,255,.1);color:#6c63ff
+}
+.project-status{
+  display:inline-block;padding:4px 12px;border-radius:100px;
+  font-size:.75rem;font-weight:500;
+  background:rgba(255,200,50,.1);color:#ffc832
+}
+
+/* ── Contact ── */
+.contact-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:48px
+}
+.contact-info h3,.contact-form h3{
+  font-size:1.2rem;font-weight:600;color:#fff;margin-bottom:8px
+}
+.contact-info p{color:#888;margin-bottom:28px;font-size:.95rem}
+.contact-links{
+  display:flex;flex-direction:column;gap:16px
+}
+.contact-link{
+  display:inline-flex;align-items:center;gap:12px;
+  color:#aaa;transition:color .25s;font-size:.95rem
+}
+.contact-link i{width:20px;color:#6c63ff;font-size:1.1rem}
+.contact-link:hover{color:#fff}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:.85rem;color:#888;margin-bottom:6px}
+.form-group input,.form-group textarea{
+  width:100%;padding:12px 16px;border-radius:8px;
+  background:#1a1a1a;border:1px solid rgba(255,255,255,.08);
+  color:#e0e0e0;font-size:.95rem;font-family:inherit;
+  transition:border-color .25s;outline:none
+}
+.form-group input:focus,.form-group textarea:focus{
+  border-color:#6c63ff
+}
+.form-group textarea{resize:vertical;min-height:100px}
+
+/* ── Footer ── */
+footer{
+  border-top:1px solid rgba(255,255,255,.06);
+  padding:40px 24px;text-align:center;color:#555;font-size:.85rem
+}
+footer .footer-links{
+  display:flex;justify-content:center;gap:24px;margin-bottom:16px
+}
+footer .footer-links a{color:#777;transition:color .25s}
+footer .footer-links a:hover{color:#6c63ff}
+
+/* ── Responsive ── */
+@media(max-width:768px){
+  section{padding:72px 20px}
+  .nav-links{
+    display:none;position:fixed;top:64px;left:0;width:100%;
+    flex-direction:column;background:rgba(10,10,10,.96);
+    backdrop-filter:blur(12px);padding:20px;gap:20px;
+    border-bottom:1px solid rgba(255,255,255,.06)
+  }
+  .nav-links.open{display:flex}
+  .nav-toggle{display:block}
+  .about-grid,.contact-grid{grid-template-columns:1fr;gap:40px}
+  .about-avatar{order:-1}
+  .avatar-frame{width:200px;height:200px}
+  .projects-grid{grid-template-columns:1fr}
+  .skills-grid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr))}
+}
+@media(max-width:480px){
+  .hero-buttons{flex-direction:column;align-items:center}
+  .btn{width:100%;justify-content:center}
+}
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">Garvin</a>
+    <button class="nav-toggle" id="navToggle" aria-label="菜单"><i class="fas fa-bars"></i></button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#about">关于</a></li>
+      <li><a href="#skills">技能</a></li>
+      <li><a href="#projects">项目</a></li>
+      <li><a href="#contact">联系</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero" id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <div class="hero-badge reveal">数学 · 代码 · 创造</div>
+    <h1 class="reveal">你好，我是 <span class="highlight">Garvin</span></h1>
+    <p class="hero-tagline reveal">
+      数学专业出身，用代码把抽象的逻辑变成看得见的东西。<br>
+      热爱从零搭建干净、有功能的网站。
+    </p>
+    <div class="hero-buttons reveal">
+      <a href="#projects" class="btn btn-primary"><i class="fas fa-code"></i> 我的项目</a>
+      <a href="#contact" class="btn btn-outline"><i class="fas fa-envelope"></i> 联系我</a>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <span>向下滚动</span>
+    <i class="fas fa-chevron-down"></i>
+  </div>
+</section>
+
+<!-- About -->
+<section id="about">
+  <div class="container">
+    <h2 class="reveal">关于 <span class="accent">我</span></h2>
+    <p class="section-sub reveal">数学思维 + 代码执行力</p>
+    <div class="about-grid">
+      <div class="about-text reveal">
+        <p>
+          我是 <strong>Garvin</strong>，一名数学专业的学生。数学教会我最重要的一件事——<br>
+          任何复杂的问题都可以拆解成清晰的逻辑步骤。
+        </p>
+        <p>
+          自学前端开发的路上，我把这种思维方式带进了代码里：<br>
+          从页面布局到交互逻辑，每一步都追求清晰、可推演。
+        </p>
+        <p>
+          我相信好的网站是功能与美学的平衡，<br>
+          而数学背景让我在数据展示、工具型页面上有独特的优势。
+        </p>
+      </div>
+      <div class="about-avatar reveal">
+        <div class="avatar-frame">
+          <div class="avatar-ring"></div>
+          <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="100" cy="80" r="38" fill="rgba(108,99,255,.2)" stroke="rgba(108,99,255,.3)" stroke-width="1.5"/>
+            <path d="M40 170 Q60 110 100 100 Q140 110 160 170" fill="rgba(108,99,255,.15)" stroke="rgba(108,99,255,.2)" stroke-width="1.5"/>
+            <path d="M72 82 L82 72 L92 82" stroke="rgba(108,99,255,.35)" stroke-width="1.5" fill="none"/>
+            <circle cx="108" cy="78" r="8" stroke="rgba(108,99,255,.25)" stroke-width="1.5" fill="none"/>
+            <path d="M120 85 Q128 80 136 88" stroke="rgba(108,99,255,.2)" stroke-width="1" fill="none"/>
+            <text x="36" y="160" fill="rgba(108,99,255,.12)" font-size="10" font-family="serif">∑</text>
+            <text x="148" y="155" fill="rgba(108,99,255,.12)" font-size="12" font-family="serif">∫</text>
+            <text x="55" y="100" fill="rgba(108,99,255,.08)" font-size="8" font-family="serif">π</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Skills -->
+<section id="skills" style="background:#0e0e0e">
+  <div class="container">
+    <h2 class="reveal">技术 <span class="accent">栈</span></h2>
+    <p class="section-sub reveal">正在积累中的工具箱</p>
+    <div class="skills-grid">
+      <div class="skill-card reveal"><i class="fab fa-html5"></i><span class="skill-label">HTML5</span></div>
+      <div class="skill-card reveal"><i class="fab fa-css3-alt"></i><span class="skill-label">CSS3</span></div>
+      <div class="skill-card reveal"><i class="fab fa-js"></i><span class="skill-label">JavaScript</span></div>
+      <div class="skill-card reveal"><i class="fab fa-python"></i><span class="skill-label">Python</span></div>
+      <div class="skill-card reveal"><i class="fab fa-git-alt"></i><span class="skill-label">Git</span></div>
+      <div class="skill-card reveal"><i class="fas fa-square-root-alt"></i><span class="skill-label">LaTeX</span></div>
+      <div class="skill-card reveal"><i class="fas fa-chart-line"></i><span class="skill-label">数据分析</span></div>
+      <div class="skill-card reveal"><i class="fas fa-mobile-alt"></i><span class="skill-label">响应式设计</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- Projects -->
+<section id="projects">
+  <div class="container">
+    <h2 class="reveal">我的 <span class="accent">项目</span></h2>
+    <p class="section-sub reveal">正在构建中 · 每一个都是完整的 demo 站点</p>
+    <div class="projects-grid">
+      <div class="project-card reveal">
+        <div class="project-thumb"><i class="fas fa-utensils"></i></div>
+        <div class="project-body">
+          <h3>Demo 01 · 餐厅站</h3>
+          <p>简洁菜单展示、营业信息、预约入口 —— 为本地小商家设计的单页网站模板。</p>
+          <span class="project-tag">即将到来</span>
+        </div>
+      </div>
+      <div class="project-card reveal">
+        <div class="project-thumb"><i class="fas fa-palette"></i></div>
+        <div class="project-body">
+          <h3>Demo 02 · 工作室站</h3>
+          <p>设计师/摄影师作品集模板，以视觉展示为核心，适配移动端浏览。</p>
+          <span class="project-tag">即将到来</span>
+        </div>
+      </div>
+      <div class="project-card reveal">
+        <div class="project-thumb"><i class="fas fa-flask"></i></div>
+        <div class="project-body">
+          <h3>更多项目</h3>
+          <p>数学工具站、个人博客…… 持续开发中。</p>
+          <span class="project-status">开发中</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Contact -->
+<section id="contact" style="background:#0e0e0e">
+  <div class="container">
+    <h2 class="reveal">联系 <span class="accent">我</span></h2>
+    <p class="section-sub reveal">一起聊聊你的项目想法</p>
+    <div class="contact-grid">
+      <div class="contact-info reveal">
+        <h3>找到我</h3>
+        <p>也可以通过下面这些渠道直接联系我</p>
+        <div class="contact-links">
+          <a href="https://github.com/Garvin666" target="_blank" rel="noopener" class="contact-link">
+            <i class="fab fa-github"></i> Garvin666
+          </a>
+          <a href="#" class="contact-link">
+            <i class="fab fa-reddit-alien"></i> 小红书
+          </a>
+          <a href="mailto:garvin@example.com" class="contact-link">
+            <i class="fas fa-envelope"></i> garvin@example.com
+          </a>
+        </div>
+      </div>
+      <div class="contact-form reveal">
+        <h3>发消息</h3>
+        <p style="color:#888;font-size:.95rem;margin-bottom:20px">填写下面的表单，我会尽快回复</p>
+        <form onsubmit="event.preventDefault();alert('感谢你的留言！我会尽快回复。')">
+          <div class="form-group">
+            <label for="name">姓名</label>
+            <input type="text" id="name" placeholder="你的名字" required>
+          </div>
+          <div class="form-group">
+            <label for="email">邮箱</label>
+            <input type="email" id="email" placeholder="your@email.com" required>
+          </div>
+          <div class="form-group">
+            <label for="message">留言</label>
+            <textarea id="message" placeholder="说说你的项目想法……" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center">
+            <i class="fas fa-paper-plane"></i> 发送
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-links">
+    <a href="https://github.com/Garvin666" target="_blank" rel="noopener"><i class="fab fa-github"></i></a>
+    <a href="#"><i class="fab fa-reddit-alien"></i></a>
+    <a href="mailto:garvin@example.com"><i class="fas fa-envelope"></i></a>
+  </div>
+  <p>&copy; 2026 Garvin. Built from scratch with <span style="color:#6c63ff">&lt;/&gt;</span></p>
+</footer>
+
+<script>
+document.getElementById('navToggle').addEventListener('click',()=>{
+  document.getElementById('navLinks').classList.toggle('open')
+})
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){entry.target.classList.add('visible')}
+  })
+},{threshold:.1})
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el))
+document.querySelectorAll('a[href^="#"]').forEach(anchor=>{
+  anchor.addEventListener('click',function(e){
+    e.preventDefault()
+    const target=document.querySelector(this.getAttribute('href'))
+    if(target){
+      target.scrollIntoView({behavior:'smooth',block:'start'})
+      document.getElementById('navLinks').classList.remove('open')
+    }
+  })
+})
+</script>
+</body>
+</html>
