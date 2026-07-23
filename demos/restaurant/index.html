@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>灞卞笨鍜栧暋 路 鎵嬩綔娓╂殩</title>
+<title>山屿咖啡 · 手作温暖</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
-/* 鈹€鈹€ Reset & Base 鈹€鈹€ */
+/* ── Reset & Base ── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{
@@ -18,7 +18,7 @@ img{max-width:100%;display:block}
 section{padding:100px 24px}
 .container{max-width:1100px;margin:0 auto}
 
-/* 鈹€鈹€ Typography 鈹€鈹€ */
+/* ── Typography ── */
 h2{
   font-size:clamp(1.75rem,3.5vw,2.2rem);
   font-weight:700;text-align:center;
@@ -30,7 +30,7 @@ h2{
   max-width:500px;margin-left:auto;margin-right:auto
 }
 
-/* 鈹€鈹€ Nav 鈹€鈹€ */
+/* ── Nav ── */
 nav{
   position:fixed;top:0;left:0;width:100%;z-index:1000;
   background:rgba(250,247,242,.92);
@@ -60,7 +60,7 @@ nav{
 .nav-links a:hover::after{width:100%}
 .nav-toggle{display:none;background:none;border:none;color:#2c1810;font-size:1.5rem;cursor:pointer}
 
-/* 鈹€鈹€ Hero 鈹€鈹€ */
+/* ── Hero ── */
 .hero{
   min-height:100vh;display:flex;align-items:center;justify-content:center;
   text-align:center;padding-top:64px;
@@ -113,7 +113,7 @@ nav{
   border-color:#b8834a;color:#b8834a;transform:translateY(-2px)
 }
 
-/* 鈹€鈹€ Menu 鈹€鈹€ */
+/* ── Menu ── */
 #menu{background:#fff}
 .menu-grid{
   display:grid;
@@ -121,15 +121,24 @@ nav{
   gap:28px
 }
 .menu-item{
-  padding:28px;border-radius:16px;
-  background:#faf7f2;
-  transition:all .3s;cursor:default
+  border-radius:16px;overflow:hidden;
+  background:#fff;cursor:default;
+  transition:all .3s;
+  box-shadow:0 2px 12px rgba(44,24,16,.04)
 }
 .menu-item:hover{
-  transform:translateY(-4px);
-  box-shadow:0 8px 24px rgba(44,24,16,.06)
+  transform:translateY(-6px);
+  box-shadow:0 12px 32px rgba(44,24,16,.1)
 }
-
+.menu-item-img{
+  aspect-ratio:16/10;
+  background-size:cover;
+  background-position:center;
+  background-color:#f0e8dc
+}
+.menu-item-body{
+  padding:20px 24px 24px
+}
 .menu-item h3{
   font-size:1.1rem;font-weight:600;color:#2c1810;
   margin-bottom:4px
@@ -149,7 +158,7 @@ nav{
   vertical-align:middle
 }
 
-/* 鈹€鈹€ Story 鈹€鈹€ */
+/* ── Story ── */
 #story{background:#f5eee6}
 .story-content{
   max-width:680px;margin:0 auto;text-align:center
@@ -162,7 +171,7 @@ nav{
   margin-top:32px;font-style:italic;color:#8a7a6a
 }
 
-/* 鈹€鈹€ Info 鈹€鈹€ */
+/* ── Info ── */
 .info-grid{
   display:grid;
   grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
@@ -184,7 +193,7 @@ nav{
   font-size:.88rem;color:#8a7a6a;line-height:1.6
 }
 
-/* 鈹€鈹€ Contact Form 鈹€鈹€ */
+/* ── Contact Form ── */
 .contact-inline{
   max-width:500px;margin:48px auto 0
 }
@@ -200,7 +209,7 @@ nav{
 .contact-inline input:focus{border-color:#b8834a}
 .contact-inline input::placeholder{color:#b0a090}
 
-/* 鈹€鈹€ Footer 鈹€鈹€ */
+/* ── Footer ── */
 footer{
   text-align:center;padding:40px 24px;
   color:#8a7a6a;font-size:.85rem;
@@ -213,7 +222,7 @@ footer .back-link{
 }
 footer .back-link:hover{color:#8a6a3a}
 
-/* 鈹€鈹€ Responsive 鈹€鈹€ */
+/* ── Responsive ── */
 @media(max-width:768px){
   section{padding:72px 20px}
   .nav-links{
@@ -226,6 +235,7 @@ footer .back-link:hover{color:#8a6a3a}
   .nav-toggle{display:block}
   .menu-grid{grid-template-columns:1fr}
   .menu-item-img{aspect-ratio:4/3}
+  .menu-item-img{aspect-ratio:4/3}
   .info-grid{grid-template-columns:1fr}
 }
 </style>
@@ -235,13 +245,13 @@ footer .back-link:hover{color:#8a6a3a}
 <!-- Nav -->
 <nav>
   <div class="nav-inner">
-    <a href="#" class="nav-logo">灞卞笨<span>鍜栧暋</span></a>
-    <button class="nav-toggle" id="navToggle" aria-label="鑿滃崟"><i class="fas fa-bars"></i></button>
+    <a href="#" class="nav-logo">山屿<span>咖啡</span></a>
+    <button class="nav-toggle" id="navToggle" aria-label="菜单"><i class="fas fa-bars"></i></button>
     <ul class="nav-links" id="navLinks">
-      <li><a href="#menu">鑿滃崟</a></li>
-      <li><a href="#story">鏁呬簨</a></li>
-      <li><a href="#info">钀ヤ笟</a></li>
-      <li><a href="#contact">鑱旂郴</a></li>
+      <li><a href="#menu">菜单</a></li>
+      <li><a href="#story">故事</a></li>
+      <li><a href="#info">营业</a></li>
+      <li><a href="#contact">联系</a></li>
     </ul>
   </div>
 </nav>
@@ -250,12 +260,12 @@ footer .back-link:hover{color:#8a6a3a}
 <section class="hero" id="hero">
   <div class="hero-content">
     <div class="hero-icon"><i class="fas fa-mug-hot"></i></div>
-    <h1>灞卞笨<span>鍜栧暋</span></h1>
-    <p class="hero-tagline">鎵嬩綔娓╂殩 路 鎱韩鏃跺厜</p>
-    <p class="hero-desc">姣忎竴鏉挅鍟￠兘鏉ヨ嚜鐜扮（璞嗗瓙涓庤€愬績娉ㄦ按<br>鐢ㄦ俯搴﹀啿鍑轰竴鍙ｅソ鍠濈殑鏃ュ父</p>
+    <h1>山屿<span>咖啡</span></h1>
+    <p class="hero-tagline">手作温暖 · 慢享时光</p>
+    <p class="hero-desc">每一杯咖啡都来自现磨豆子与耐心注水<br>用温度冲出一口好喝的日常</p>
     <div class="hero-buttons">
-      <a href="#menu" class="btn btn-primary"><i class="fas fa-coffee"></i> 鏌ョ湅鑿滃崟</a>
-      <a href="#story" class="btn btn-outline"><i class="fas fa-book-open"></i> 鎴戜滑鐨勬晠浜?/a>
+      <a href="#menu" class="btn btn-primary"><i class="fas fa-coffee"></i> 查看菜单</a>
+      <a href="#story" class="btn btn-outline"><i class="fas fa-book-open"></i> 我们的故事</a>
     </div>
   </div>
 </section>
@@ -263,92 +273,47 @@ footer .back-link:hover{color:#8a6a3a}
 <!-- Menu -->
 <section id="menu">
   <div class="container">
-    <h2>浠婃棩鑿滃崟</h2>
-    <p class="section-sub">姣忎竴娆鹃兘鏄敤蹇冨嚭鍝?/p>
+    <h2>今日菜单</h2>
+    <p class="section-sub">每一款都是用心出品</p>
     <div class="menu-grid">
       <div class="menu-item">
-        <div class="menu-item-img" style="background-image:url('https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&h=250&fit=crop&auto=format')"></div>
-        <div class="menu-item-body">
-          <h3>经典美式</h3>
-          <p class="desc">埃塞俄比亚单品豆 · 深烘 · 口感醇厚</p>
-          <span class="price">¥22</span>
-          <span class="badge">人气</span>
-        </div>
+        <div class="menu-item-icon"><i class="fas fa-mug-hot"></i></div>
+        <h3>经典美式</h3>
+        <p class="desc">埃塞俄比亚单品豆 · 深烘 · 口感醇厚</p>
+        <span class="price">¥22</span>
+        <span class="badge">人气</span>
       </div>
-      <div class="menu-item">
-        <div class="menu-item-img" style="background-image:url('https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=400&h=250&fit=crop&auto=format')"></div>
-        <div class="menu-item-body">
-          <h3>燕麦拿铁</h3>
-          <p class="desc">Oatly 燕麦奶 + 双份浓缩 · 顺滑微甜</p>
-          <span class="price">¥28</span>
-          <span class="badge">新品</span>
-        </div>
-      </div>
-      <div class="menu-item">
-        <div class="menu-item-img" style="background-image:url('https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&h=250&fit=crop&auto=format')"></div>
-        <div class="menu-item-body">
-          <h3>手冲单品</h3>
-          <p class="desc">每日精选产区 · 虹吸/手冲 · 可选中浅烘</p>
-          <span class="price">¥35</span>
-        </div>
-      </div>
-      <div class="menu-item">
-        <div class="menu-item-img" style="background-image:url('https://images.unsplash.com/photo-1536256263959-770b48d82b0a?w=400&h=250&fit=crop&auto=format')"></div>
-        <div class="menu-item-body">
-          <h3>抹茶拿铁</h3>
-          <p class="desc">日本宇治抹茶 · 无糖可选 · 冷热皆宜</p>
-          <span class="price">¥26</span>
-        </div>
-      </div>
-      <div class="menu-item">
-        <div class="menu-item-img" style="background-image:url('https://images.unsplash.com/photo-1556679343-c7306c1976fc?w=400&h=250&fit=crop&auto=format')"></div>
-        <div class="menu-item-body">
-          <h3>巴斯克芝士蛋糕</h3>
-          <p class="desc">重芝士 · 焦香表层 · 每日手工限量</p>
-          <span class="price">¥32</span>
-          <span class="badge">甜点</span>
-        </div>
-      </div>
-      <div class="menu-item">
-        <div class="menu-item-img" style="background-image:url('https://images.unsplash.com/photo-1555507036-ab1f4038024b?w=400&h=250&fit=crop&auto=format')"></div>
-        <div class="menu-item-body">
-          <h3>黄油可颂</h3>
-          <p class="desc">法国 AOP 黄油 · 72 小时低温发酵 · 酥脆分层</p>
-          <span class="price">¥18</span>
-        </div>
-      </div>
-    </div>
       <div class="menu-item">
         <div class="menu-item-icon"><i class="fas fa-glass-whiskey"></i></div>
-        <h3>鐕曢害鎷块搧</h3>
-        <p class="desc">Oatly 鐕曢害濂?+ 鍙屼唤娴撶缉 路 椤烘粦寰敎</p>
-        <span class="price">楼28</span>
-        <span class="badge">鏂板搧</span>
+        <h3>燕麦拿铁</h3>
+        <p class="desc">Oatly 燕麦奶 + 双份浓缩 · 顺滑微甜</p>
+        <span class="price">¥28</span>
+        <span class="badge">新品</span>
       </div>
       <div class="menu-item">
         <div class="menu-item-icon"><i class="fas fa-wine-bottle"></i></div>
-        <h3>鎵嬪啿鍗曞搧</h3>
-        <p class="desc">姣忔棩绮鹃€変骇鍖?路 铏瑰惛/鎵嬪啿 路 鍙€変腑娴呯儤</p>
-        <span class="price">楼35</span>
+        <h3>手冲单品</h3>
+        <p class="desc">每日精选产区 · 虹吸/手冲 · 可选中浅烘</p>
+        <span class="price">¥35</span>
       </div>
       <div class="menu-item">
         <div class="menu-item-icon"><i class="fas fa-cup-straw"></i></div>
-        <h3>鎶硅尪鎷块搧</h3>
-        <p class="desc">鏃ユ湰瀹囨不鎶硅尪 路 鏃犵硸鍙€?路 鍐风儹鐨嗗疁</p>
-        <span class="price">楼26</span>
+        <h3>抹茶拿铁</h3>
+        <p class="desc">日本宇治抹茶 · 无糖可选 · 冷热皆宜</p>
+        <span class="price">¥26</span>
       </div>
       <div class="menu-item">
         <div class="menu-item-icon"><i class="fas fa-cheese"></i></div>
-        <h3>宸存柉鍏嬭姖澹泲绯?/h3>
-        <p class="desc">閲嶈姖澹?路 鐒﹂琛ㄥ眰 路 姣忔棩鎵嬪伐闄愰噺</p>
-        <span class="price">楼32</span>
-        <span class="badge">鐢滅偣</span>
+        <h3>巴斯克芝士蛋糕</h3>
+        <p class="desc">重芝士 · 焦香表层 · 每日手工限量</p>
+        <span class="price">¥32</span>
+        <span class="badge">甜点</span>
       </div>
       <div class="menu-item">
         <div class="menu-item-icon"><i class="fas fa-bread-slice"></i></div>
-        <h3>榛勬补鍙</h3>
-        <p class="desc">娉曞浗 AOP 榛勬补 路 72 灏忔椂浣庢俯鍙戦叺 路 閰ヨ剢鍒嗗眰</p>
-        <span class="price">楼18</span>
+        <h3>黄油可颂</h3>
+        <p class="desc">法国 AOP 黄油 · 72 小时低温发酵 · 酥脆分层</p>
+        <span class="price">¥18</span>
       </div>
     </div>
   </div>
@@ -357,13 +322,13 @@ footer .back-link:hover{color:#8a6a3a}
 <!-- Story -->
 <section id="story">
   <div class="container">
-    <h2>鍏充簬灞卞笨</h2>
-    <p class="section-sub">涓€鏉挅鍟＄殑娓╁害锛屼粠閫夎眴寮€濮?/p>
+    <h2>关于山屿</h2>
+    <p class="section-sub">一杯咖啡的温度，从选豆开始</p>
     <div class="story-content">
-      <p>灞卞笨鍜栧暋寮€鍦ㄤ竴鏉″畨闈欑殑鑰佽涓婏紝鑰佹澘鑰侀檲鍦ㄤ簯鍗楄窇浜嗕笁骞达紝鎵嶅畾涓嬬幇鍦ㄧ殑璞嗗瓙渚涘簲銆傚簵閲岀敤鐨勬槸鑷繁鎷奸厤鐨勬繁鐑樿眴锛屼笓闂ㄤ负鎼厤鏈湴楗涔犳儻璋冭瘯杩団€斺€斾笉閰搞€佷笉娑┿€佸洖鐢樻槑鏄俱€?/p>
-      <p>"鍜栧暋涓嶅彧鏄彁绁炵殑涓滆タ锛屽畠搴旇鏄竴澶╅噷涓€涓兘璁╀汉鍠樺彛姘旂殑鑺傜偣銆?鑰侀檲璇磋繖璇濈殑鏃跺€欙紝姝ｅ湪缁欐柊鍒扮殑鍩冨淇勬瘮浜氳眴鍋氭澂娴嬨€?/p>
-      <p>搴楅噷娌℃湁澶嶆潅鐨勮淇紝姘存偿澧欍€佹殩鍏夈€佹湪妗屽瓙锛屽涓婃寕鐫€涓€骞呮墜缁樼殑鍜栧暋浜у尯鍦板浘銆傜啛瀹㈡潵浜嗙洿鎺ヨ嚜宸辨壘鏉瓙锛屾柊瀹㈡潵浜嗚€侀檲浼氶棶涓€鍙ワ細"鍠滄鍠濋吀鐨勮繕鏄笉閰哥殑锛?</p>
-      <p class="story-sign">鈥斺€?浠ヤ笂鏁呬簨绾睘铏氭瀯锛屼絾鍜栧暋鏄湡鐨勫ソ鍠?馃槉</p>
+      <p>山屿咖啡开在一条安静的老街上，老板老陈在云南跑了三年，才定下现在的豆子供应。店里用的是自己拼配的深烘豆，专门为搭配本地饮食习惯调试过——不酸、不涩、回甘明显。</p>
+      <p>"咖啡不只是提神的东西，它应该是一天里一个能让人喘口气的节点。"老陈说这话的时候，正在给新到的埃塞俄比亚豆做杯测。</p>
+      <p>店里没有复杂的装修，水泥墙、暖光、木桌子，墙上挂着一幅手绘的咖啡产区地图。熟客来了直接自己找杯子，新客来了老陈会问一句："喜欢喝酸的还是不酸的？"</p>
+      <p class="story-sign">—— 以上故事纯属虚构，但咖啡是真的好喝 😊</p>
     </div>
   </div>
 </section>
@@ -371,23 +336,23 @@ footer .back-link:hover{color:#8a6a3a}
 <!-- Info -->
 <section id="info">
   <div class="container">
-    <h2>钀ヤ笟淇℃伅</h2>
-    <p class="section-sub">娆㈣繋鏉ュ仛瀹?/p>
+    <h2>营业信息</h2>
+    <p class="section-sub">欢迎来做客</p>
     <div class="info-grid">
       <div class="info-card">
         <i class="fas fa-clock"></i>
-        <h3>钀ヤ笟鏃堕棿</h3>
-        <p>鍛ㄤ竴鑷冲懆浜?08:00 - 20:00<br>鍛ㄦ湯 09:00 - 21:00</p>
+        <h3>营业时间</h3>
+        <p>周一至周五 08:00 - 20:00<br>周末 09:00 - 21:00</p>
       </div>
       <div class="info-card">
         <i class="fas fa-location-dot"></i>
-        <h3>搴楅摵鍦板潃</h3>
-        <p>瑗挎箹鍖烘枃涓夎矾 128 鍙?br>璺濆湴閾?2 鍙风嚎瀛﹂櫌璺珯 300 绫?/p>
+        <h3>店铺地址</h3>
+        <p>西湖区文三路 128 号<br>距地铁 2 号线学院路站 300 米</p>
       </div>
       <div class="info-card">
         <i class="fas fa-phone"></i>
-        <h3>鑱旂郴鐢佃瘽</h3>
-        <p>0571-8888-8888<br>锛堝彲鎻愬墠璁㈠骇锛?/p>
+        <h3>联系电话</h3>
+        <p>0571-8888-8888<br>（可提前订座）</p>
       </div>
     </div>
   </div>
@@ -397,10 +362,10 @@ footer .back-link:hover{color:#8a6a3a}
 <section id="contact" style="background:#f5eee6;padding-top:0;margin-top:-20px">
   <div class="container">
     <div class="contact-inline">
-      <form onsubmit="event.preventDefault();alert('鎰熻阿鐣欒█锛佹垜浠細灏藉揩鑱旂郴浣犮€?)">
-        <input type="text" placeholder="浣犵殑绉板懠" required>
-        <input type="tel" placeholder="鎵嬫満鍙? required>
-        <button type="submit" class="btn btn-primary" style="border-radius:100px">棰勭害璁㈠骇</button>
+      <form onsubmit="event.preventDefault();alert('感谢留言！我们会尽快联系你。')">
+        <input type="text" placeholder="你的称呼" required>
+        <input type="tel" placeholder="手机号" required>
+        <button type="submit" class="btn btn-primary" style="border-radius:100px">预约订座</button>
       </form>
     </div>
   </div>
@@ -409,8 +374,9 @@ footer .back-link:hover{color:#8a6a3a}
 <!-- Footer -->
 <footer>
   <a href="https://garvin666.github.io/Garvin-s/" class="back-link">
-    <i class="fas fa-arrow-left"></i> 杩斿洖浣滃搧闆?  </a>
-  <p>&copy; 2026 灞卞笨鍜栧暋 路 Demo 绔欑偣</p>
+    <i class="fas fa-arrow-left"></i> 返回作品集
+  </a>
+  <p>&copy; 2026 山屿咖啡 · Demo 站点</p>
 </footer>
 
 <script>
