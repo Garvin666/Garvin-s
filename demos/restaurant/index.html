@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>山屿咖啡 · 手作温暖</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+/* ── Reset & Base ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans SC",sans-serif;
+  background:#faf7f2;color:#2c1810;line-height:1.6
+}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+section{padding:100px 24px}
+.container{max-width:1100px;margin:0 auto}
+
+/* ── Typography ── */
+h2{
+  font-size:clamp(1.75rem,3.5vw,2.2rem);
+  font-weight:700;text-align:center;
+  margin-bottom:12px;letter-spacing:-.02em
+}
+.section-sub{
+  text-align:center;color:#8a7a6a;
+  font-size:1rem;margin-bottom:56px;
+  max-width:500px;margin-left:auto;margin-right:auto
+}
+
+/* ── Nav ── */
+nav{
+  position:fixed;top:0;left:0;width:100%;z-index:1000;
+  background:rgba(250,247,242,.92);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(44,24,16,.06);
+  padding:0 24px
+}
+.nav-inner{
+  display:flex;justify-content:space-between;align-items:center;
+  max-width:1100px;margin:0 auto;height:64px
+}
+.nav-logo{
+  font-weight:800;font-size:1.15rem;
+  letter-spacing:.02em
+}
+.nav-logo span{color:#b8834a}
+.nav-links{display:flex;gap:28px;list-style:none}
+.nav-links a{
+  font-size:.88rem;color:#5c4a3a;
+  transition:color .25s;position:relative
+}
+.nav-links a::after{
+  content:'';position:absolute;bottom:-4px;left:0;width:0;height:2px;
+  background:#b8834a;transition:width .25s
+}
+.nav-links a:hover{color:#b8834a}
+.nav-links a:hover::after{width:100%}
+.nav-toggle{display:none;background:none;border:none;color:#2c1810;font-size:1.5rem;cursor:pointer}
+
+/* ── Hero ── */
+.hero{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  text-align:center;padding-top:64px;
+  background:linear-gradient(135deg,#f5eee6 0%,#efe5d8 40%,#e8dccc 100%);
+  position:relative;overflow:hidden
+}
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at 30% 70%,rgba(184,131,74,.06) 0%,transparent 50%),
+             radial-gradient(circle at 70% 30%,rgba(184,131,74,.04) 0%,transparent 50%)
+}
+.hero-content{position:relative;z-index:1;max-width:680px}
+.hero-icon{
+  font-size:2.5rem;color:#b8834a;margin-bottom:20px;
+  display:inline-block
+}
+.hero h1{
+  font-size:clamp(2.8rem,7vw,4.2rem);
+  font-weight:800;color:#1a0f08;
+  letter-spacing:-.03em;line-height:1.1;
+  margin-bottom:12px
+}
+.hero h1 span{color:#b8834a}
+.hero-tagline{
+  font-size:clamp(1rem,2vw,1.2rem);
+  color:#7a6a5a;margin-bottom:16px
+.hero-desc{
+  font-size:.95rem;color:#8a7a6a;
+  max-width:420px;margin:0 auto 36px
+}
+.hero-buttons{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:14px 32px;border-radius:100px;
+  font-weight:600;font-size:.9rem;
+  transition:all .25s;cursor:pointer;border:none
+}
+.btn-primary{
+  background:#b8834a;color:#fff
+}
+.btn-primary:hover{
+  background:#a0723e;transform:translateY(-2px);
+  box-shadow:0 8px 24px rgba(184,131,74,.3)
+}
+.btn-outline{
+  background:transparent;color:#5c4a3a;
+  border:1.5px solid rgba(44,24,16,.15)
+}
+.btn-outline:hover{
+  border-color:#b8834a;color:#b8834a;transform:translateY(-2px)
+}
+
+/* ── Menu ── */
+#menu{background:#fff}
+.menu-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+  gap:28px
+}
+.menu-item{
+  padding:28px;border-radius:16px;
+  background:#faf7f2;
+  transition:all .3s;cursor:default
+}
+.menu-item:hover{
+  transform:translateY(-4px);
+  box-shadow:0 8px 24px rgba(44,24,16,.06)
+}
+.menu-item-icon{
+  font-size:1.8rem;color:#b8834a;margin-bottom:12px
+}
+.menu-item h3{
+  font-size:1.1rem;font-weight:600;color:#2c1810;
+  margin-bottom:4px
+}
+.menu-item .desc{
+  font-size:.85rem;color:#8a7a6a;
+  margin-bottom:10px;line-height:1.5
+}
+.menu-item .price{
+  font-weight:700;color:#b8834a;font-size:1.05rem
+}
+.menu-item .badge{
+  display:inline-block;margin-left:8px;
+  padding:2px 10px;border-radius:100px;
+  font-size:.7rem;font-weight:600;
+  background:rgba(184,131,74,.12);color:#b8834a;
+  vertical-align:middle
+}
+
+/* ── Story ── */
+#story{background:#f5eee6}
+.story-content{
+  max-width:680px;margin:0 auto;text-align:center
+}
+.story-content p{
+  color:#5c4a3a;font-size:1.05rem;margin-bottom:20px
+}
+.story-content p:last-child{margin-bottom:0}
+.story-sign{
+  margin-top:32px;font-style:italic;color:#8a7a6a
+}
+
+/* ── Info ── */
+.info-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+  gap:28px;
+  max-width:800px;margin:0 auto
+}
+.info-card{
+  text-align:center;padding:36px 24px;
+  border-radius:16px;background:#faf7f2;
+  border:1px solid rgba(44,24,16,.04)
+}
+.info-card i{
+  font-size:1.8rem;color:#b8834a;margin-bottom:12px
+}
+.info-card h3{
+  font-size:1rem;font-weight:600;margin-bottom:8px;color:#2c1810
+}
+.info-card p{
+  font-size:.88rem;color:#8a7a6a;line-height:1.6
+}
+
+/* ── Contact Form ── */
+.contact-inline{
+  max-width:500px;margin:48px auto 0
+}
+.contact-inline form{display:flex;gap:12px;flex-wrap:wrap}
+.contact-inline input{
+  flex:1;min-width:200px;
+  padding:14px 20px;border-radius:100px;
+  border:1.5px solid rgba(44,24,16,.1);
+  background:#fff;font-size:.9rem;
+  font-family:inherit;outline:none;
+  transition:border-color .25s;color:#2c1810
+}
+.contact-inline input:focus{border-color:#b8834a}
+.contact-inline input::placeholder{color:#b0a090}
+
+/* ── Footer ── */
+footer{
+  text-align:center;padding:40px 24px;
+  color:#8a7a6a;font-size:.85rem;
+  border-top:1px solid rgba(44,24,16,.06)
+}
+footer .back-link{
+  display:inline-flex;align-items:center;gap:6px;
+  color:#b8834a;font-weight:500;font-size:.9rem;
+  margin-bottom:20px;transition:color .25s
+}
+footer .back-link:hover{color:#8a6a3a}
+
+/* ── Responsive ── */
+@media(max-width:768px){
+  section{padding:72px 20px}
+  .nav-links{
+    display:none;position:fixed;top:64px;left:0;width:100%;
+    flex-direction:column;background:#faf7f2;
+    backdrop-filter:blur(12px);padding:20px;gap:16px;
+    border-bottom:1px solid rgba(44,24,16,.06)
+  }
+  .nav-links.open{display:flex}
+  .nav-toggle{display:block}
+  .menu-grid{grid-template-columns:1fr}
+  .info-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">山屿<span>咖啡</span></a>
+    <button class="nav-toggle" id="navToggle" aria-label="菜单"><i class="fas fa-bars"></i></button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#menu">菜单</a></li>
+      <li><a href="#story">故事</a></li>
+      <li><a href="#info">营业</a></li>
+      <li><a href="#contact">联系</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero" id="hero">
+  <div class="hero-content">
+    <div class="hero-icon"><i class="fas fa-mug-hot"></i></div>
+    <h1>山屿<span>咖啡</span></h1>
+    <p class="hero-tagline">手作温暖 · 慢享时光</p>
+    <p class="hero-desc">每一杯咖啡都来自现磨豆子与耐心注水<br>用温度冲出一口好喝的日常</p>
+    <div class="hero-buttons">
+      <a href="#menu" class="btn btn-primary"><i class="fas fa-coffee"></i> 查看菜单</a>
+      <a href="#story" class="btn btn-outline"><i class="fas fa-book-open"></i> 我们的故事</a>
+    </div>
+  </div>
+</section>
+
+<!-- Menu -->
+<section id="menu">
+  <div class="container">
+    <h2>今日菜单</h2>
+    <p class="section-sub">每一款都是用心出品</p>
+    <div class="menu-grid">
+      <div class="menu-item">
+        <div class="menu-item-icon"><i class="fas fa-mug-hot"></i></div>
+        <h3>经典美式</h3>
+        <p class="desc">埃塞俄比亚单品豆 · 深烘 · 口感醇厚</p>
+        <span class="price">¥22</span>
+        <span class="badge">人气</span>
+      </div>
+      <div class="menu-item">
+        <div class="menu-item-icon"><i class="fas fa-glass-whiskey"></i></div>
+        <h3>燕麦拿铁</h3>
+        <p class="desc">Oatly 燕麦奶 + 双份浓缩 · 顺滑微甜</p>
+        <span class="price">¥28</span>
+        <span class="badge">新品</span>
+      </div>
+      <div class="menu-item">
+        <div class="menu-item-icon"><i class="fas fa-wine-bottle"></i></div>
+        <h3>手冲单品</h3>
+        <p class="desc">每日精选产区 · 虹吸/手冲 · 可选中浅烘</p>
+        <span class="price">¥35</span>
+      </div>
+      <div class="menu-item">
+        <div class="menu-item-icon"><i class="fas fa-cup-straw"></i></div>
+        <h3>抹茶拿铁</h3>
+        <p class="desc">日本宇治抹茶 · 无糖可选 · 冷热皆宜</p>
+        <span class="price">¥26</span>
+      </div>
+      <div class="menu-item">
+        <div class="menu-item-icon"><i class="fas fa-cheese"></i></div>
+        <h3>巴斯克芝士蛋糕</h3>
+        <p class="desc">重芝士 · 焦香表层 · 每日手工限量</p>
+        <span class="price">¥32</span>
+        <span class="badge">甜点</span>
+      </div>
+      <div class="menu-item">
+        <div class="menu-item-icon"><i class="fas fa-bread-slice"></i></div>
+        <h3>黄油可颂</h3>
+        <p class="desc">法国 AOP 黄油 · 72 小时低温发酵 · 酥脆分层</p>
+        <span class="price">¥18</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Story -->
+<section id="story">
+  <div class="container">
+    <h2>关于山屿</h2>
+    <p class="section-sub">一杯咖啡的温度，从选豆开始</p>
+    <div class="story-content">
+      <p>山屿咖啡开在一条安静的老街上，老板老陈在云南跑了三年，才定下现在的豆子供应。店里用的是自己拼配的深烘豆，专门为搭配本地饮食习惯调试过——不酸、不涩、回甘明显。</p>
+      <p>"咖啡不只是提神的东西，它应该是一天里一个能让人喘口气的节点。"老陈说这话的时候，正在给新到的埃塞俄比亚豆做杯测。</p>
+      <p>店里没有复杂的装修，水泥墙、暖光、木桌子，墙上挂着一幅手绘的咖啡产区地图。熟客来了直接自己找杯子，新客来了老陈会问一句："喜欢喝酸的还是不酸的？"</p>
+      <p class="story-sign">—— 以上故事纯属虚构，但咖啡是真的好喝 😊</p>
+    </div>
+  </div>
+</section>
+
+<!-- Info -->
+<section id="info">
+  <div class="container">
+    <h2>营业信息</h2>
+    <p class="section-sub">欢迎来做客</p>
+    <div class="info-grid">
+      <div class="info-card">
+        <i class="fas fa-clock"></i>
+        <h3>营业时间</h3>
+        <p>周一至周五 08:00 - 20:00<br>周末 09:00 - 21:00</p>
+      </div>
+      <div class="info-card">
+        <i class="fas fa-location-dot"></i>
+        <h3>店铺地址</h3>
+        <p>西湖区文三路 128 号<br>距地铁 2 号线学院路站 300 米</p>
+      </div>
+      <div class="info-card">
+        <i class="fas fa-phone"></i>
+        <h3>联系电话</h3>
+        <p>0571-8888-8888<br>（可提前订座）</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Contact -->
+<section id="contact" style="background:#f5eee6;padding-top:0;margin-top:-20px">
+  <div class="container">
+    <div class="contact-inline">
+      <form onsubmit="event.preventDefault();alert('感谢留言！我们会尽快联系你。')">
+        <input type="text" placeholder="你的称呼" required>
+        <input type="tel" placeholder="手机号" required>
+        <button type="submit" class="btn btn-primary" style="border-radius:100px">预约订座</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <a href="https://garvin666.github.io/Garvin-s/" class="back-link">
+    <i class="fas fa-arrow-left"></i> 返回作品集
+  </a>
+  <p>&copy; 2026 山屿咖啡 · Demo 站点</p>
+</footer>
+
+<script>
+document.getElementById('navToggle').addEventListener('click',()=>{
+  document.getElementById('navLinks').classList.toggle('open')
+})
+document.querySelectorAll('a[href^="#"]').forEach(anchor=>{
+  anchor.addEventListener('click',function(e){
+    e.preventDefault()
+    const target=document.querySelector(this.getAttribute('href'))
+    if(target){
+      target.scrollIntoView({behavior:'smooth',block:'start'})
+      document.getElementById('navLinks').classList.remove('open')
+    }
+  })
+})
+</script>
+</body>
+</html>
