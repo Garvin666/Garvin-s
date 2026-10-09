@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="数学工具站 —— 函数绘图、矩阵运算、线性方程组与微积分的即开即用网页工具，零依赖、纯本地计算。">
+<title>数学工具站 · 即开即用的计算工具</title>
+<!--
+  ============================================================================
+  作品 Demo · 数学工具站
+  定位：把常用的数学计算与可视化做成即开即用的网页工具
+  ----------------------------------------------------------------------------
+  零外部依赖、零上传：所有计算在本机浏览器内完成，输入内容不出本机。
+    · 函数绘图   —— 自研表达式解析器（递归下降 → 闭包编译）+ Canvas 2D
+    · 矩阵运算   —— 行列式 / 秩 / 转置 / 逆矩阵
+    · 线性方程组 —— 增广矩阵高斯-约当消元，判定唯一解 / 无穷多解 / 无解
+    · 微积分     —— 定积分（Simpson）与数值导数（中心差分）
+  ============================================================================
+-->
+<style>
+/* ============================== 设计令牌 ==============================
+   与主页共用同一套语汇：暖白墨色 + 品牌紫 + 三族字体混排。
+   对比度修正：--mute 由 4.0:1 提到 5.3:1；主按钮底色加深 —— 白字原为 4.1:1，不达 AA。 */
+:root{
+  --bg:#0b0b0d;
+  --bg-alt:#101014;
+  --card:#14141a;
+  --card-2:#191920;
+  --border:rgba(240,238,233,.08);
+  --border-2:rgba(240,238,233,.15);
+  --accent:#8b83ff;
+  --accent-2:#a78bfa;
+  --accent-soft:rgba(139,131,255,.12);
+  --btn:#5f57e0;
+  --text:#f0eee9;
+  --dim:#9a98a4;
+  --mute:#85838f;
+  --ok:#5eead4;
+  --warn:#e3b341;
+  --err:#ff6b6b;
+  --serif:"Source Han Serif SC","Noto Serif SC","Songti SC",SimSun,Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue","PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",sans-serif;
+  --mono:"JetBrains Mono","Cascadia Code","SF Mono",Consolas,"Liberation Mono",Menlo,monospace;
+  --ease:cubic-bezier(.2,.8,.2,1);
+  --r:14px;
+  --maxw:1080px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  font-family:var(--sans);
+  background:var(--bg);color:var(--text);line-height:1.65;overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+svg{display:block}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
+.container{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+.icon{width:1em;height:1em;flex:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;fill:none}
+.mono{font-family:var(--mono)}
+/* 顶部滚动进度（与主页一致） */
+#prog{position:fixed;top:0;left:0;height:2px;width:0;z-index:70;
+  background:linear-gradient(90deg,var(--accent),var(--ok))}
+
+/* ================================ 顶栏 ================================ */
+.topbar{position:sticky;top:0;z-index:60;background:rgba(10,10,15,.8);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--border)}
+.topbar-in{max-width:var(--maxw);margin:0 auto;height:62px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:.96rem}
+.brand .mark{width:28px;height:28px;border-radius:8px;flex:none;display:flex;align-items:center;justify-content:center;
+  background:var(--accent-soft);color:var(--accent-2);font-size:.9rem}
+.back-link{display:inline-flex;align-items:center;gap:7px;font-size:.83rem;color:var(--dim);
+  border:1px solid var(--border);padding:7px 15px;border-radius:100px;transition:color .25s,border-color .25s}
+.back-link:hover{color:#fff;border-color:var(--border-2)}
+
+/* ================================= 头部 ================================= */
+.hero{padding:64px 0 40px;text-align:center;position:relative;overflow:hidden}
+.hero-glow{position:absolute;top:-180px;left:50%;transform:translateX(-50%);width:640px;height:400px;pointer-events:none;
+  background:radial-gradient(ellipse,rgba(108,99,255,.16),transparent 65%)}
+.hero h1{position:relative;font-family:var(--serif);font-size:clamp(1.9rem,5vw,3rem);
+  font-weight:600;letter-spacing:-.005em;line-height:1.2;margin-bottom:14px}
+.hero h1 span{background:linear-gradient(135deg,var(--accent),var(--accent-2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{position:relative;color:var(--mute);font-size:.94rem;max-width:520px;margin:0 auto}
+.hero .privacy{display:inline-flex;align-items:center;gap:7px;margin-top:18px;font-size:.78rem;color:var(--accent-2);
+  background:var(--accent-soft);border:1px solid rgba(108,99,255,.2);padding:6px 15px;border-radius:100px}
+
+/* ================================= 标签页 ================================= */
+.tabs{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:34px 0 26px}
+.tab{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:100px;font-size:.87rem;
+  color:var(--dim);border:1px solid var(--border);background:var(--card);transition:all .25s}
+.tab:hover{color:#fff;border-color:var(--border-2)}
+.tab[aria-selected="true"]{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
+.tab .icon{font-size:1rem}
+
+/* ================================= 面板 ================================= */
+.panel{display:none;padding-bottom:72px}
+.panel.on{display:block;animation:fadeUp .34s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:22px;margin-bottom:18px}
+.card > h2{font-size:1rem;font-weight:600;color:#fff;margin-bottom:6px;display:flex;align-items:center;gap:9px}
+.card > h2::before{content:'';width:3px;height:14px;border-radius:2px;background:var(--accent)}
+.card .hint{font-size:.8rem;color:var(--mute);margin-bottom:16px}
+.card .hint code{background:rgba(255,255,255,.05);padding:1px 6px;border-radius:5px;font-size:.78rem;color:var(--accent-2)}
+
+label.fl{display:block;font-size:.8rem;color:var(--dim);margin-bottom:7px;font-weight:500}
+input[type=text],textarea,select{
+  width:100%;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;
+  color:var(--text);font-size:.9rem;padding:11px 14px;font-family:inherit;transition:border-color .22s;
+}
+textarea{resize:vertical;line-height:1.7;font-family:var(--mono)}
+input[type=text]:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent)}
+input::placeholder,textarea::placeholder{color:#5a5a70}
+.row{display:grid;gap:14px}
+.row-2{grid-template-columns:1fr 1fr}
+.row-3{grid-template-columns:repeat(3,1fr)}
+.field{margin-bottom:16px}
+.field:last-child{margin-bottom:0}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 22px;border-radius:10px;
+  font-size:.88rem;font-weight:600;transition:transform .2s,background .2s,border-color .2s,box-shadow .2s}
+.btn-primary{background:var(--btn);color:#fff}
+.btn-primary:hover{background:#514ac9;transform:translateY(-1px);box-shadow:0 8px 20px rgba(95,87,224,.42)}
+.btn-ghost{border:1px solid var(--border-2);color:var(--dim)}
+.btn-ghost:hover{color:#fff;border-color:var(--accent)}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+.btn-sm{padding:7px 15px;font-size:.8rem;border-radius:8px}
+
+.example{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.ex{padding:4px 11px;border-radius:100px;font-size:.75rem;color:var(--mute);border:1px solid var(--border);
+  background:rgba(255,255,255,.03);transition:color .2s,border-color .2s}
+.ex:hover{color:var(--accent-2);border-color:rgba(108,99,255,.35)}
+
+/* ================================ 绘图区 ================================ */
+.plot-head{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:14px}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.8rem}
+.legend span{display:inline-flex;align-items:center;gap:7px;color:var(--dim)}
+.legend i{width:16px;height:3px;border-radius:2px;display:block}
+.plot-wrap{position:relative;background:var(--bg-alt);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+/* 高度必须由 CSS 固定：否则设置 canvas.height 会反向撑高固有尺寸，
+   下次读取 getBoundingClientRect 得到更大的值，逐帧累积成指数增长。 */
+canvas{display:block;width:100%;height:420px;touch-action:none;cursor:crosshair}
+.plot-tip{position:absolute;pointer-events:none;background:rgba(11,11,13,.94);border:1px solid var(--border-2);
+  border-radius:8px;padding:6px 11px;font-size:.76rem;color:var(--text);white-space:nowrap;display:none;z-index:5;
+  font-family:var(--mono)}
+.plot-tip.on{display:block}
+
+/* ================================ 结果区 ================================ */
+.out{margin-top:16px}
+.out:empty{display:none}
+.res{background:var(--bg-alt);border:1px solid var(--border);border-radius:11px;padding:16px 18px;margin-bottom:12px}
+.res:last-child{margin-bottom:0}
+.res h3{font-size:.82rem;font-weight:600;color:var(--accent-2);margin-bottom:11px;letter-spacing:.02em}
+.res .val{font-size:1.18rem;font-weight:600;color:#fff;word-break:break-word;
+  font-family:var(--mono);font-variant-numeric:tabular-nums}
+.res .note{font-size:.78rem;color:var(--mute);margin-top:8px}
+table.mx{border-collapse:separate;border-spacing:0;font-family:var(--mono);font-size:.86rem}
+table.mx td{padding:7px 15px;text-align:right;border-bottom:1px solid var(--border);color:var(--text);font-variant-numeric:tabular-nums}
+table.mx tr:last-child td{border-bottom:none}
+table.mx td:first-child{border-left:2px solid var(--border-2)}
+table.mx td:last-child{border-right:2px solid var(--border-2)}
+table.mx tr:first-child td{border-top:2px solid var(--border-2)}
+table.mx tr:last-child td{border-bottom:2px solid var(--border-2)}
+.mx-scroll{overflow-x:auto;padding:6px 2px}
+.alert{border-radius:11px;padding:14px 17px;font-size:.86rem;display:flex;gap:10px;align-items:flex-start;margin-bottom:12px}
+.alert:last-child{margin-bottom:0}
+.alert .icon{font-size:1.05rem;margin-top:2px}
+.alert-err{background:rgba(255,107,107,.09);border:1px solid rgba(255,107,107,.28);color:#ffb3b3}
+.alert-err .icon{color:var(--err)}
+.alert-ok{background:rgba(62,207,142,.08);border:1px solid rgba(62,207,142,.24);color:#8ee9c0}
+.alert-ok .icon{color:var(--ok)}
+.alert-warn{background:rgba(227,179,65,.08);border:1px solid rgba(227,179,65,.26);color:#f0d38a}
+.alert-warn .icon{color:var(--warn)}
+
+/* ================================ 页脚 ================================ */
+footer{border-top:1px solid var(--border);padding:40px 24px;text-align:center;color:var(--mute);font-size:.82rem}
+footer a{color:var(--dim);border-bottom:1px solid var(--border)}
+footer a:hover{color:#fff}
+footer .sep{margin:0 9px;opacity:.5}
+.note-list{margin-top:12px;font-size:.76rem;color:#5a5a70;line-height:1.9;text-align:left;max-width:560px;margin-left:auto;margin-right:auto}
+.note-list b{color:var(--mute);font-weight:600}
+
+/* =============================== 响应式 =============================== */
+@media(max-width:760px){
+  .container{padding:0 18px}
+  .topbar-in{padding:0 18px}
+  .row-2,.row-3{grid-template-columns:1fr}
+  .hero{padding:44px 0 30px}
+  .tabs{gap:6px;margin:26px 0 20px}
+  .tab{padding:9px 15px;font-size:.82rem}
+  .card{padding:18px}
+  .brand span.t{display:none}
+  canvas{height:300px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
+}
+</style>
+</head>
+<body>
+
+<div id="prog" role="presentation"></div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></symbol>
+  <symbol id="i-fx" viewBox="0 0 24 24"><path d="M3 12h4l3 8 4-16h7"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></symbol>
+  <symbol id="i-eq" viewBox="0 0 24 24"><path d="M4 9h16M4 15h16"/></symbol>
+  <symbol id="i-int" viewBox="0 0 24 24"><path d="M9 4c0-1.5 2-2 3-.5v17c0 1.5-2 2-3 .5"/><path d="M6 8h7M8 18h7" opacity=".55"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16.5v.01"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="i-reset" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></symbol>
+</svg>
+
+<div class="topbar">
+  <div class="topbar-in">
+    <div class="brand">
+      <span class="mark"><svg class="icon" aria-hidden="true"><use href="#i-fx"/></svg></span>
+      <span class="t">数学工具站</span>
+    </div>
+    <a class="back-link" href="../../index.html">
+      <svg class="icon" aria-hidden="true"><use href="#i-arrow-left"/></svg> 返回作品集
+    </a>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="hero-glow" aria-hidden="true"></div>
+  <h1>常用的数学计算，<span>打开就能用</span></h1>
+  <p>函数绘图、矩阵运算、线性方程组与微积分，四个工具，无需安装、无需注册。</p>
+  <div class="privacy"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg> 全部在本机计算，输入内容不会上传</div>
+</header>
+
+<main class="container">
+
+  <!-- ============================== 标签页 ============================== -->
+  <div class="tabs" role="tablist" aria-label="工具选择">
+    <button class="tab" role="tab" id="tab-plot" aria-controls="panel-plot" aria-selected="true" data-panel="plot">
+      <svg class="icon" aria-hidden="true"><use href="#i-fx"/></svg> 函数绘图
+    </button>
+    <button class="tab" role="tab" id="tab-matrix" aria-controls="panel-matrix" aria-selected="false" data-panel="matrix">
+      <svg class="icon" aria-hidden="true"><use href="#i-grid"/></svg> 矩阵运算
+    </button>
+    <button class="tab" role="tab" id="tab-linear" aria-controls="panel-linear" aria-selected="false" data-panel="linear">
+      <svg class="icon" aria-hidden="true"><use href="#i-eq"/></svg> 线性方程组
+    </button>
+    <button class="tab" role="tab" id="tab-calc" aria-controls="panel-calc" aria-selected="false" data-panel="calc">
+      <svg class="icon" aria-hidden="true"><use href="#i-int"/></svg> 微积分
+    </button>
+  </div>
+
+  <!-- ============================= 工具一：绘图 ============================= -->
+  <section class="panel on" id="panel-plot" role="tabpanel" aria-labelledby="tab-plot">
+    <div class="card">
+      <h2>函数绘图</h2>
+      <p class="hint">
+        支持 <code>+ - * / ^</code> 与括号，函数 <code>sin cos tan asin acos atan sinh cosh tanh</code>、
+        <code>ln log log2 exp sqrt abs sign floor ceil round</code>，常数 <code>pi e</code>。
+        可省略乘号，如 <code>2x</code>、<code>3sin(x)</code>。
+      </p>
+      <div class="row row-2">
+        <div class="field" style="margin-bottom:0">
+          <label class="fl" for="f1">f₁(x)</label>
+          <input type="text" id="f1" class="mono" value="sin(x)*x/3" spellcheck="false" autocomplete="off">
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label class="fl" for="f2">f₂(x)（可留空）</label>
+          <input type="text" id="f2" class="mono" value="cos(x)" spellcheck="false" autocomplete="off">
+        </div>
+      </div>
+      <div class="example" id="exPlot"></div>
+      <div class="btn-row" style="margin-top:16px">
+        <button class="btn btn-primary" id="plotGo">绘制</button>
+        <button class="btn btn-ghost btn-sm" id="plotReset">
+          <svg class="icon" aria-hidden="true"><use href="#i-reset"/></svg> 重置视图
+        </button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="plot-head">
+        <div class="legend">
+          <span><i style="background:#6c63ff"></i> f₁(x)</span>
+          <span><i style="background:#5eead4"></i> f₂(x)</span>
+        </div>
+        <span class="hint" style="margin:0">拖拽平移 · 滚轮缩放 · 悬停取值</span>
+      </div>
+      <div class="plot-wrap">
+        <canvas id="cv" height="420" role="img" aria-label="函数图像"></canvas>
+        <div class="plot-tip" id="tip"></div>
+      </div>
+      <div class="out" id="plotOut"></div>
+    </div>
+  </section>
+
+  <!-- ============================= 工具二：矩阵 ============================= -->
+  <section class="panel" id="panel-matrix" role="tabpanel" aria-labelledby="tab-matrix">
+    <div class="card">
+      <h2>矩阵运算</h2>
+      <p class="hint">每行一个行向量，元素用空格或逗号分隔。例如 3×3 矩阵写三行。</p>
+      <div class="row row-2">
+        <div class="field" style="margin-bottom:0">
+          <label class="fl" for="mA">矩阵 A</label>
+          <textarea id="mA" rows="4" spellcheck="false" placeholder="1 2 3&#10;4 5 6&#10;7 8 10">1 2 3
+4 5 6
+7 8 10</textarea>
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label class="fl" for="mB">矩阵 B（仅乘法需要）</label>
+          <textarea id="mB" rows="4" spellcheck="false" placeholder="留空则只计算 A 自身的属性">2 0 1
+1 3 2
+0 1 1</textarea>
+        </div>
+      </div>
+      <div class="example" id="exMatrix"></div>
+      <div class="btn-row" style="margin-top:16px">
+        <button class="btn btn-primary" id="matrixGo">计算</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>结果</h2>
+      <p class="hint" id="matrixHint">点击「计算」查看行列式、秩、转置与逆矩阵。</p>
+      <div class="out" id="matrixOut"></div>
+    </div>
+  </section>
+
+  <!-- =========================== 工具三：线性方程组 =========================== -->
+  <section class="panel" id="panel-linear" role="tabpanel" aria-labelledby="tab-linear">
+    <div class="card">
+      <h2>线性方程组</h2>
+      <p class="hint">
+        输入<b>增广矩阵</b>：每行是一行方程，最后一列是等号右边的常数。
+        例如 <code>x + 2y = 5</code>、<code>3x - y = 1</code> 写作两行 <code>1 2 5</code> 与 <code>3 -1 1</code>。
+      </p>
+      <div class="field">
+        <label class="fl" for="linA">增广矩阵（每行一个方程，最后一位是常数项）</label>
+        <textarea id="linA" rows="4" spellcheck="false" placeholder="1 2 5&#10;3 -1 1">1 1 1 6
+0 2 5 -4
+2 5 -1 27</textarea>
+      </div>
+      <div class="example" id="exLinear"></div>
+      <div class="btn-row" style="margin-top:16px">
+        <button class="btn btn-primary" id="linearGo">求解</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>结果</h2>
+      <p class="hint" id="linearHint">点击「求解」查看解的情况与解向量。</p>
+      <div class="out" id="linearOut"></div>
+    </div>
+  </section>
+
+  <!-- =========================== 工具四：微积分 =========================== -->
+  <section class="panel" id="panel-calc" role="tabpanel" aria-labelledby="tab-calc">
+    <div class="card">
+      <h2>微积分</h2>
+      <p class="hint">表达式语法与「函数绘图」一致，变量为 <code>x</code>。</p>
+      <div class="row row-2">
+        <div class="field" style="margin-bottom:0">
+          <label class="fl" for="cf">f(x)</label>
+          <input type="text" id="cf" class="mono" value="sin(x)/x" spellcheck="false" autocomplete="off">
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label class="fl" for="cx">求导点 x₀</label>
+          <input type="text" id="cx" class="mono" value="1" spellcheck="false" autocomplete="off">
+        </div>
+      </div>
+      <div class="row row-2" style="margin-top:16px">
+        <div class="field" style="margin-bottom:0">
+          <label class="fl" for="ca">积分下限 a</label>
+          <input type="text" id="ca" class="mono" value="0" spellcheck="false" autocomplete="off">
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label class="fl" for="cb">积分上限 b</label>
+          <input type="text" id="cb" class="mono" value="pi" spellcheck="false" autocomplete="off">
+        </div>
+      </div>
+      <div class="example" id="exCalc"></div>
+      <div class="btn-row" style="margin-top:16px">
+        <button class="btn btn-primary" id="calcGo">计算</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>结果</h2>
+      <p class="hint" id="calcHint">点击「计算」查看定积分值与导数近似值。</p>
+      <div class="out" id="calcOut"></div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div>作品 Demo · 数学工具站</div>
+  <div class="note-list">
+    <b>方法说明：</b>定积分默认用复合 Simpson 公式（2000 等分，四阶精度）；若积分端点处函数值未定义，
+    自动降级为<b>复合中点法</b>——它不采样端点，因此 <code>sin(x)/x</code> 在 x=0 这类可去奇点能被正确处理。
+    导数用中心差分（步长 10⁻⁵·max(1,|x₀|)）并做 Richardson 外推，都是数值近似，与解析解存在舍入误差量级的偏差。<br>
+    <b>边界情况：</b>函数在区间<b>内部</b>不连续或发散时（如 1/x 跨 0），工具会明确提示结果不可信；
+    矩阵奇异或近似奇异时不给逆矩阵，而是直接告知不可逆，避免输出噪声值。
+  </div>
+  <div style="margin-top:22px"><a href="../../index.html">← 返回 Garvin 的作品集</a></div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+  function icon(id) { return '<svg class="icon" aria-hidden="true"><use href="#i-' + id + '"/></svg>'; }
+
+  /* 数值格式化：保留 8 位有效数字，去掉浮点噪声（1e-15 级） */
+  function fmt(n) {
+    if (typeof n !== 'number' || !isFinite(n)) return '—';
+    if (n === 0) return '0';
+    var a = Math.abs(n);
+    if (a < 1e-10) return '0';
+    if (a >= 1e9 || a < 1e-4) return n.toExponential(6).replace(/\.?0+e/, 'e');
+    var r = Number(n.toPrecision(8));
+    if (Math.abs(r - Math.round(r)) < 1e-9) return String(Math.round(r));
+    return String(r);
+  }
+  function alertBox(type, msg) {
+    var map = { err: 'alert', ok: 'check', warn: 'alert' };
+    return '<div class="alert alert-' + type + '">' + icon(map[type]) + '<div>' + msg + '</div></div>';
+  }
+
+  /* ======================================================================
+   *  表达式解析器（递归下降 → 闭包编译）
+   *  入口 compile(src) 返回 function(x) -> number
+   *  文法：
+   *    expr   := term (('+'|'-') term)*
+   *    term   := unary (('*'|'/'|隐式乘) unary)*
+   *    unary  := ('+'|'-') unary | power
+   *    power  := primary ('^' unary)?            // 右结合
+   *    primary:= number | constant | var | func '(' args ')' | '(' expr ')'
+   * ====================================================================== */
+  var FUNCS = {
+    sin: Math.sin, cos: Math.cos, tan: Math.tan,
+    asin: Math.asin, acos: Math.acos, atan: Math.atan,
+    sinh: Math.sinh, cosh: Math.cosh, tanh: Math.tanh,
+    ln: Math.log, log: function (v) { return Math.log10(v); },
+    log2: Math.log2, log10: Math.log10,
+    exp: Math.exp, sqrt: Math.sqrt, abs: Math.abs, sign: Math.sign,
+    floor: Math.floor, ceil: Math.ceil, round: Math.round,
+    pow: Math.pow, min: Math.min, max: Math.max,
+    atan2: Math.atan2
+  };
+  var CONSTS = { pi: Math.PI, e: Math.E, tau: 2 * Math.PI };
+
+  function compile(src) {
+    var s = String(src == null ? '' : src);
+    if (!s.trim()) throw new SyntaxError('表达式为空');
+    var i = 0;
+
+    function ws() { while (i < s.length && /\s/.test(s[i])) i++; }
+    function stop(msg) {
+      var t = s.slice(Math.max(0, i - 12), i + 12);
+      throw new SyntaxError(msg + '（位置 ' + (i + 1) + '：…' + t + '…）');
+    }
+    function num() {
+      var m = /^(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?/.exec(s.slice(i));
+      if (!m) stop('缺少数字');
+      i += m[0].length;
+      var v = parseFloat(m[0]);
+      return function () { return v; };
+    }
+    function ident() {
+      var m = /^[A-Za-z_][A-Za-z_0-9]*/.exec(s.slice(i));
+      if (!m) return null;
+      i += m[0].length;
+      return m[0];
+    }
+
+    function primary() {
+      ws();
+      if (i >= s.length) stop('表达式意外结束');
+      var c = s[i];
+
+      if (c === '(') {
+        i++;
+        var inner = expr();
+        ws();
+        if (s[i] !== ')') stop('缺少右括号');
+        i++;
+        return inner;
+      }
+      if (/[\d.]/.test(c)) return num();
+
+      var name = ident();
+      if (name === null) stop('无法识别的字符「' + c + '」');
+      var low = name.toLowerCase();
+
+      if (low === 'x') return function (x) { return x; };
+      if (Object.prototype.hasOwnProperty.call(CONSTS, low)) {
+        var cv = CONSTS[low];
+        return function () { return cv; };
+      }
+      ws();
+      if (s[i] === '(') {
+        if (!Object.prototype.hasOwnProperty.call(FUNCS, low)) {
+          // 未知函数名：给出明确提示而不是静默算错
+          throw new SyntaxError('不认识的函数「' + name + '」');
+        }
+        i++;
+        var args = [];
+        ws();
+        if (s[i] !== ')') {
+          for (;;) {
+            args.push(expr());
+            ws();
+            if (s[i] === ',') { i++; continue; }
+            break;
+          }
+        }
+        if (s[i] !== ')') stop('函数缺少右括号');
+        i++;
+        var fn = FUNCS[low];
+        var captured = args.slice();
+        /* 单参数函数走快路径：绘图时要被调用数十万次，避免每次 map 建数组 */
+        if (captured.length === 1) {
+          var a0 = captured[0];
+          return function (x) { return fn(a0(x)); };
+        }
+        return function (x) { return fn.apply(null, captured.map(function (f) { return f(x); })); };
+      }
+      if (Object.prototype.hasOwnProperty.call(FUNCS, low)) {
+        throw new SyntaxError('函数「' + name + '」后面需要括号，如 ' + name + '(x)');
+      }
+      throw new SyntaxError('未知符号「' + name + '」（变量只支持 x）');
+    }
+
+    function power() {
+      var base = primary();
+      ws();
+      if (s[i] === '^') {
+        i++;
+        var expo = unary();          // 右结合，且右侧允许一元负号：2^-1
+        return function (x) { return Math.pow(base(x), expo(x)); };
+      }
+      return base;
+    }
+
+    function unary() {
+      ws();
+      if (s[i] === '-') { i++; var f = unary(); return function (x) { return -f(x); }; }
+      if (s[i] === '+') { i++; return unary(); }
+      return power();
+    }
+
+    function term() {
+      var left = unary();
+      for (;;) {
+        ws();
+        var c = s[i];
+        if (c === '*') { i++; var r = unary(); left = (function (a, b) { return function (x) { return a(x) * b(x); }; })(left, r); }
+        else if (c === '/') { i++; var r2 = unary(); left = (function (a, b) { return function (x) { return a(x) / b(x); }; })(left, r2); }
+        else if (c === undefined || c === ')' || c === ',') return left;
+        else if (c === '+' || c === '-') return left;
+        else if (/[A-Za-z_(\d.]/.test(c)) {
+          // 隐式乘法：2x、2(x+1)、2sin(x)、x(x+1)
+          var r3 = unary();
+          left = (function (a, b) { return function (x) { return a(x) * b(x); }; })(left, r3);
+        } else return left;
+      }
+    }
+
+    function expr() {
+      var left = term();
+      for (;;) {
+        ws();
+        if (s[i] === '+') { i++; var r = term(); left = (function (a, b) { return function (x) { return a(x) + b(x); }; })(left, r); }
+        else if (s[i] === '-') { i++; var r2 = term(); left = (function (a, b) { return function (x) { return a(x) - b(x); }; })(left, r2); }
+        else return left;
+      }
+    }
+
+    var fn = expr();
+    ws();
+    if (i < s.length) stop('表达式末尾有多余内容「' + s.slice(i) + '」');
+    return fn;
+  }
+
+  /* ======================================================================
+   *  工具一 · 函数绘图
+   * ====================================================================== */
+  var cv = $('cv'), ctx = cv.getContext('2d'), tip = $('tip');
+  var view = { x0: -10, x1: 10, y0: -5, y1: 5 };
+  var curves = [];              // [{fn, color, label}]
+  var hover = null;             // 当前悬停的 x 坐标
+  var W = 0, H = 0;
+
+  function niceStep(range, target) {
+    var raw = range / Math.max(1, target);
+    var mag = Math.pow(10, Math.floor(Math.log10(raw)));
+    var n = raw / mag;
+    var mult = n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10;
+    return mult * mag;
+  }
+
+  function resizeCanvas() {
+    var rect = cv.getBoundingClientRect();
+    var dpr = window.devicePixelRatio || 1;
+    W = rect.width;
+    H = rect.height || 420;
+    cv.width = Math.round(W * dpr);
+    cv.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  /* 采样求 y 范围：取 2%~98% 分位，避免 tan 之类函数被渐近线撑爆坐标轴 */
+  function autoY() {
+    if (!curves.length) { view.y0 = -5; view.y1 = 5; return; }
+    var xs0 = view.x0, xs1 = view.x1, N = 600, ys = [];
+    for (var i = 0; i <= N; i++) {
+      var x = xs0 + (xs1 - xs0) * i / N;
+      for (var k = 0; k < curves.length; k++) {
+        var v = curves[k].fn(x);
+        if (typeof v === 'number' && isFinite(v)) ys.push(v);
+      }
+    }
+    if (!ys.length) { view.y0 = -5; view.y1 = 5; return; }
+    ys.sort(function (a, b) { return a - b; });
+    var lo = ys[Math.floor(ys.length * 0.02)];
+    var hi = ys[Math.floor(ys.length * 0.98)];
+    if (!(hi > lo)) { lo -= 1; hi += 1; }
+    var pad = (hi - lo) * 0.12 || 1;
+    view.y0 = lo - pad;
+    view.y1 = hi + pad;
+  }
+
+  var PX = function (x) { return (x - view.x0) / (view.x1 - view.x0) * W; };
+  var PY = function (y) { return H - (y - view.y0) / (view.y1 - view.y0) * H; };
+
+  function draw() {
+    if (!W) resizeCanvas();
+    ctx.clearRect(0, 0, W, H);
+
+    var stepX = niceStep(view.x1 - view.x0, Math.max(4, Math.round(W / 110)));
+    var stepY = niceStep(view.y1 - view.y0, Math.max(3, Math.round(H / 80)));
+
+    /* 网格 */
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = 'rgba(255,255,255,.05)';
+    ctx.beginPath();
+    var gx = Math.ceil(view.x0 / stepX) * stepX;
+    for (; gx <= view.x1; gx += stepX) {
+      var px = Math.round(PX(gx)) + .5;
+      ctx.moveTo(px, 0); ctx.lineTo(px, H);
+    }
+    var gy = Math.ceil(view.y0 / stepY) * stepY;
+    for (; gy <= view.y1; gy += stepY) {
+      var py = Math.round(PY(gy)) + .5;
+      ctx.moveTo(0, py); ctx.lineTo(W, py);
+    }
+    ctx.stroke();
+
+    /* 坐标轴 */
+    ctx.strokeStyle = 'rgba(255,255,255,.28)';
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    if (view.y0 <= 0 && view.y1 >= 0) { var ax = Math.round(PY(0)) + .5; ctx.moveTo(0, ax); ctx.lineTo(W, ax); }
+    if (view.x0 <= 0 && view.x1 >= 0) { var ay = Math.round(PX(0)) + .5; ctx.moveTo(ay, 0); ctx.lineTo(ay, H); }
+    ctx.stroke();
+
+    /* 刻度标签 */
+    ctx.fillStyle = '#6a6a80';
+    ctx.font = '11px ui-monospace,Menlo,Consolas,monospace';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    var yBase = (view.y0 <= 0 && view.y1 >= 0) ? Math.min(PY(0) + 4, H - 15) : H - 15;
+    for (var tx = Math.ceil(view.x0 / stepX) * stepX; tx <= view.x1; tx += stepX) {
+      if (Math.abs(tx) < stepX * 1e-6) continue;
+      ctx.fillText(fmt(tx), PX(tx), yBase);
+    }
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    var xBase = (view.x0 <= 0 && view.x1 >= 0) ? Math.max(PX(0) - 6, 26) : W - 6;
+    for (var ty = Math.ceil(view.y0 / stepY) * stepY; ty <= view.y1; ty += stepY) {
+      if (Math.abs(ty) < stepY * 1e-6) continue;
+      ctx.fillText(fmt(ty), xBase, PY(ty));
+    }
+
+    /* 曲线 */
+    curves.forEach(function (c) {
+      ctx.strokeStyle = c.color;
+      ctx.lineWidth = 2;
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      var N = Math.max(500, Math.round(W * 1.6));
+      var pen = false, prevPy = null;
+      for (var i = 0; i <= N; i++) {
+        var x = view.x0 + (view.x1 - view.x0) * i / N;
+        var y = c.fn(x);
+        if (typeof y !== 'number' || !isFinite(y) || Math.abs(y) > 1e7) { pen = false; prevPy = null; continue; }
+        var cxp = PX(x), cyp = PY(y);
+        /* 断点检测：相邻两点纵向跳跃过大，说明跨过了不连续点 */
+        if (pen && prevPy !== null && Math.abs(cyp - prevPy) > H * 1.4) { pen = false; }
+        if (!pen) { ctx.moveTo(cxp, cyp); pen = true; } else { ctx.lineTo(cxp, cyp); }
+        prevPy = cyp;
+      }
+      ctx.stroke();
+    });
+
+    /* 悬停点 */
+    if (hover) {
+      ctx.fillStyle = '#fff';
+      curves.forEach(function (c) {
+        var y = c.fn(hover);
+        if (typeof y === 'number' && isFinite(y) && y >= view.y0 && y <= view.y1) {
+          ctx.beginPath(); ctx.arc(PX(hover), PY(y), 3.6, 0, Math.PI * 2); ctx.fill();
+        }
+      });
+    }
+  }
+
+  function resetView() { view.x0 = -10; view.x1 = 10; autoY(); draw(); }
+  function fitView() { autoY(); draw(); }
+
+  /* 绘制入口：解析两个表达式 */
+  function doPlot() {
+    var out = $('plotOut');
+    curves = [];
+    var errs = [];
+    [{ id: 'f1', color: '#6c63ff', label: 'f₁' }, { id: 'f2', color: '#5eead4', label: 'f₂' }].forEach(function (d) {
+      var src = $(d.id).value.trim();
+      if (!src) return;
+      try {
+        curves.push({ fn: compile(src), color: d.color, label: d.label + '(x) = ' + src });
+      } catch (e) {
+        errs.push(d.label + '：' + e.message);
+      }
+    });
+
+    if (!curves.length) {
+      out.innerHTML = errs.length
+        ? errs.map(function (m) { return alertBox('err', '表达式有误 —— ' + esc(m)); }).join('')
+        : alertBox('warn', '请至少填写一个函数表达式。');
+      autoY(); draw();
+      return;
+    }
+
+    autoY();
+    draw();
+
+    var html = '';
+    if (errs.length) {
+      html += errs.map(function (m) { return alertBox('err', '表达式有误 —— ' + esc(m)); }).join('');
+    }
+    /* 给出几个有代表性的取值，便于快速核对 */
+    html += curves.map(function (c) {
+      var pts = [-2, -1, 0, 1, 2].map(function (x) {
+        var y = c.fn(x);
+        return '<span style="color:var(--mute)">f(' + x + ') =</span> <b style="color:#fff">' +
+          esc(isFinite(y) ? fmt(y) : '未定义') + '</b>';
+      }).join('<span style="color:#3a3a48"> · </span>');
+      return '<div class="res"><h3>' + esc(c.label) + '</h3><div style="font-size:.85rem;line-height:2">' + pts + '</div></div>';
+    }).join('');
+    out.innerHTML = html;
+  }
+
+  /* 交互：拖拽平移 + 滚轮缩放 + 悬停取值 */
+  var drag = null;
+  cv.addEventListener('pointerdown', function (e) {
+    drag = { x: e.clientX, v0: view.x0, v1: view.x1 };
+    cv.setPointerCapture(e.pointerId);
+    cv.style.cursor = 'grabbing';
+  });
+  cv.addEventListener('pointermove', function (e) {
+    var rect = cv.getBoundingClientRect();
+    var mx = e.clientX - rect.left;
+    if (drag) {
+      var dx = (e.clientX - drag.x) / W * (drag.v1 - drag.v0);
+      view.x0 = drag.v0 - dx; view.x1 = drag.v1 - dx;
+      autoY(); draw();
+      return;
+    }
+    hover = view.x0 + mx / W * (view.x1 - view.x0);
+    draw();
+    if (curves.length) {
+      var lines = curves.map(function (c) {
+        var y = c.fn(hover);
+        return c.label.split(' = ')[0] + ' = ' + (isFinite(y) ? fmt(y) : '未定义');
+      }).join('   ');
+      tip.innerHTML = 'x = ' + fmt(hover) + '<br>' + esc(lines);
+      tip.classList.add('on');
+      var tw = tip.offsetWidth;
+      tip.style.left = Math.min(Math.max(mx + 14, 6), Math.max(6, W - tw - 6)) + 'px';
+      tip.style.top = Math.max(8, (e.clientY - rect.top) - 46) + 'px';
+    }
+  });
+  function endDrag() { drag = null; cv.style.cursor = 'crosshair'; }
+  cv.addEventListener('pointerup', endDrag);
+  cv.addEventListener('pointercancel', endDrag);
+  cv.addEventListener('pointerleave', function () {
+    endDrag(); hover = null; tip.classList.remove('on'); draw();
+  });
+  cv.addEventListener('wheel', function (e) {
+    e.preventDefault();
+    var rect = cv.getBoundingClientRect();
+    var mx = (e.clientX - rect.left) / W;
+    var cx = view.x0 + mx * (view.x1 - view.x0);
+    var k = e.deltaY > 0 ? 1.12 : 1 / 1.12;
+    view.x0 = cx - (cx - view.x0) * k;
+    view.x1 = cx + (view.x1 - cx) * k;
+    autoY(); draw();
+  }, { passive: false });
+
+  $('plotGo').addEventListener('click', doPlot);
+  $('plotReset').addEventListener('click', function () { resetView(); });
+  ['f1', 'f2'].forEach(function (id) {
+    $(id).addEventListener('keydown', function (e) { if (e.key === 'Enter') doPlot(); });
+  });
+
+  /* ======================================================================
+   *  共用 · 矩阵解析与数值方法
+   * ====================================================================== */
+  function parseMatrix(text, name) {
+    var lines = String(text || '').split('\n')
+      .map(function (l) { return l.trim(); })
+      .filter(function (l) { return l !== ''; });
+    if (!lines.length) throw new Error(name + '：还没有输入内容');
+    var m = lines.map(function (line, ri) {
+      var parts = line.split(/[\s,，]+/).filter(function (p) { return p !== ''; });
+      if (!parts.length) throw new Error(name + '：第 ' + (ri + 1) + ' 行是空的');
+      return parts.map(function (p) {
+        var v = Number(p);
+        if (!isFinite(v)) throw new Error(name + '：第 ' + (ri + 1) + ' 行「' + p + '」不是有效数字');
+        return v;
+      });
+    });
+    var cols = m[0].length;
+    for (var i = 0; i < m.length; i++) {
+      if (m[i].length !== cols) {
+        throw new Error(name + '：第 ' + (i + 1) + ' 行有 ' + m[i].length + ' 个数，与第一行的 ' + cols + ' 个不一致');
+      }
+    }
+    return m;
+  }
+  function cloneM(a) { return a.map(function (r) { return r.slice(); }); }
+
+  /* 行列式：高斯消元 + 部分主元 */
+  function det(a) {
+    var n = a.length, m = cloneM(a), d = 1;
+    for (var i = 0; i < n; i++) {
+      var p = i;
+      for (var r = i + 1; r < n; r++) if (Math.abs(m[r][i]) > Math.abs(m[p][i])) p = r;
+      if (Math.abs(m[p][i]) < 1e-12) return 0;
+      if (p !== i) { var t = m[p]; m[p] = m[i]; m[i] = t; d = -d; }
+      d *= m[i][i];
+      for (var r2 = i + 1; r2 < n; r2++) {
+        var f = m[r2][i] / m[i][i];
+        for (var c = i; c < n; c++) m[r2][c] -= f * m[i][c];
+      }
+    }
+    return d;
+  }
+
+  /* 行阶梯形：返回 {m, rank, pivots}；用于秩与方程组判定 */
+  function rref(a) {
+    var m = cloneM(a), rows = m.length, cols = m[0].length;
+    var pivots = [], r = 0;
+    for (var c = 0; c < cols && r < rows; c++) {
+      var p = r;
+      for (var k = r + 1; k < rows; k++) if (Math.abs(m[k][c]) > Math.abs(m[p][c])) p = k;
+      if (Math.abs(m[p][c]) < 1e-12) continue;
+      var t = m[p]; m[p] = m[r]; m[r] = t;
+      var piv = m[r][c];
+      for (var c2 = 0; c2 < cols; c2++) m[r][c2] /= piv;
+      for (var k2 = 0; k2 < rows; k2++) {
+        if (k2 === r) continue;
+        var f = m[k2][c];
+        if (Math.abs(f) < 1e-15) continue;
+        for (var c3 = 0; c3 < cols; c3++) m[k2][c3] -= f * m[r][c3];
+      }
+      pivots.push(c);
+      r++;
+    }
+    return { m: m, rank: r, pivots: pivots };
+  }
+
+  /* 逆矩阵：高斯-约当；不可逆返回 null */
+  function inv(a) {
+    var n = a.length;
+    if (a[0].length !== n) throw new Error('只有方阵可以求逆');
+    var m = a.map(function (row, i) {
+      var ext = row.slice();
+      for (var j = 0; j < n; j++) ext.push(i === j ? 1 : 0);
+      return ext;
+    });
+    for (var c = 0; c < n; c++) {
+      var p = c;
+      for (var r = c + 1; r < n; r++) if (Math.abs(m[r][c]) > Math.abs(m[p][c])) p = r;
+      if (Math.abs(m[p][c]) < 1e-12) return null;
+      var t = m[p]; m[p] = m[c]; m[c] = t;
+      var piv = m[c][c];
+      for (var j2 = 0; j2 < 2 * n; j2++) m[c][j2] /= piv;
+      for (var r2 = 0; r2 < n; r2++) {
+        if (r2 === c) continue;
+        var f = m[r2][c];
+        if (Math.abs(f) < 1e-15) continue;
+        for (var j3 = 0; j3 < 2 * n; j3++) m[r2][j3] -= f * m[c][j3];
+      }
+    }
+    return m.map(function (row) { return row.slice(n); });
+  }
+
+  function mul(a, b) {
+    if (a[0].length !== b.length) {
+      throw new Error('不能相乘：A 的列数 (' + a[0].length + ') 与 B 的行数 (' + b.length + ') 不相等');
+    }
+    var out = [];
+    for (var i = 0; i < a.length; i++) {
+      out.push([]);
+      for (var j = 0; j < b[0].length; j++) {
+        var s = 0;
+        for (var k = 0; k < b.length; k++) s += a[i][k] * b[k][j];
+        out[i].push(s);
+      }
+    }
+    return out;
+  }
+  function transpose(a) { return a[0].map(function (_, j) { return a.map(function (r) { return r[j]; }); }); }
+
+  function matrixHTML(m) {
+    return '<div class="mx-scroll"><table class="mx">' + m.map(function (row) {
+      return '<tr>' + row.map(function (v) { return '<td>' + esc(fmt(v)) + '</td>'; }).join('') + '</tr>';
+    }).join('') + '</table></div>';
+  }
+
+  /* ======================================================================
+   *  工具二 · 矩阵运算
+   * ====================================================================== */
+  $('matrixGo').addEventListener('click', function () {
+    var out = $('matrixOut');
+    var A, B;
+    try {
+      A = parseMatrix($('mA').value, '矩阵 A');
+    } catch (e) {
+      out.innerHTML = alertBox('err', esc(e.message));
+      return;
+    }
+    var bText = $('mB').value.trim();
+    try {
+      B = bText ? parseMatrix(bText, '矩阵 B') : null;
+    } catch (e2) {
+      out.innerHTML = alertBox('err', esc(e2.message));
+      return;
+    }
+
+    var square = A.length === A[0].length;
+    var html = '<div class="res"><h3>矩阵 A（' + A.length + ' × ' + A[0].length + '）</h3>' + matrixHTML(A) + '</div>';
+
+    if (square) {
+      var d = det(A);
+      var r = rref(A).rank;
+      html += '<div class="res"><h3>行列式 det(A)</h3><div class="val">' + esc(fmt(d)) + '</div>' +
+        (Math.abs(d) < 1e-10
+          ? '<div class="note">行列式为 0，矩阵奇异，因此不可逆；它与 A 的秩 ' + r + ' 小于阶数 ' + A.length + ' 是同一件事。</div>'
+          : '<div class="note">矩阵满秩（rank = ' + r + ' = 阶数），可逆。</div>') + '</div>';
+    } else {
+      html += '<div class="res"><h3>说明</h3><div class="note">A 不是方阵，行列式与逆矩阵只对方阵有定义。当前 A 的秩为 ' +
+        rref(A).rank + '。</div></div>';
+    }
+
+    html += '<div class="res"><h3>转置 Aᵗ（' + A[0].length + ' × ' + A.length + '）</h3>' + matrixHTML(transpose(A)) + '</div>';
+
+    if (square) {
+      var iv;
+      try { iv = inv(A); } catch (e3) { iv = null; }
+      html += '<div class="res"><h3>逆矩阵 A⁻¹</h3>' +
+        (iv ? matrixHTML(iv) + '<div class="note">校验：A × A⁻¹ 应等于单位矩阵。</div>'
+            : alertBox('warn', '矩阵奇异（行列式为 ' + esc(fmt(det(A))) + '），逆矩阵不存在。')) +
+        '</div>';
+    }
+
+    if (B) {
+      html += '<div class="res"><h3>矩阵 B（' + B.length + ' × ' + B[0].length + '）</h3>' + matrixHTML(B) + '</div>';
+      try {
+        html += '<div class="res"><h3>A × B（' + A.length + ' × ' + B[0].length + '）</h3>' + matrixHTML(mul(A, B)) + '</div>';
+      } catch (e4) {
+        html += '<div class="res"><h3>A × B</h3>' + alertBox('err', esc(e4.message)) + '</div>';
+      }
+      try {
+        html += '<div class="res"><h3>B × A（' + B.length + ' × ' + A[0].length + '）</h3>' + matrixHTML(mul(B, A)) + '</div>';
+      } catch (e5) {
+        html += '<div class="res"><h3>B × A</h3>' + alertBox('err', esc(e5.message)) + '</div>';
+      }
+    }
+
+    out.innerHTML = html;
+  });
+
+  /* ======================================================================
+   *  工具三 · 线性方程组
+   * ====================================================================== */
+  $('linearGo').addEventListener('click', function () {
+    var out = $('linearOut');
+    var M;
+    try {
+      M = parseMatrix($('linA').value, '增广矩阵');
+    } catch (e) {
+      out.innerHTML = alertBox('err', esc(e.message));
+      return;
+    }
+    if (M[0].length < 2) {
+      out.innerHTML = alertBox('err', '增广矩阵至少要有 2 列：未知数系数 + 常数项。');
+      return;
+    }
+
+    var rows = M.length, ncol = M[0].length, n = ncol - 1;
+    var R = rref(M);
+    var rankA = 0, rankAug = R.rank;
+
+    /* A 的秩 = 增广矩阵阶梯形中主元落在「系数列」(索引 < n) 的个数 */
+    rankA = R.pivots.filter(function (c) { return c < n; }).length;
+
+    var html = '<div class="res"><h3>增广矩阵（' + rows + ' 个方程，' + n + ' 个未知数）</h3>' + matrixHTML(M) + '</div>';
+    html += '<div class="res"><h3>行简化阶梯形</h3>' + matrixHTML(R.m) + '</div>';
+    html += '<div class="res"><h3>秩</h3><div class="val">rank(A) = ' + rankA + '，rank(A|b) = ' + rankAug + '</div></div>';
+
+    var sol = '';
+    if (rankA < rankAug) {
+      sol = alertBox('err', '<b>无解。</b>因为 rank(A) &lt; rank(A|b)，增广矩阵中出现了一行「0 = 非零常数」的矛盾方程。');
+    } else if (rankA === n) {
+      /* 唯一解：从 RREF 直接读出 */
+      var x = [];
+      for (var i = 0; i < n; i++) x.push(0);
+      R.pivots.forEach(function (c, idx) {
+        if (c < n) x[c] = R.m[idx][n];
+      });
+      sol = alertBox('ok', '<b>有唯一解。</b>rank(A) = 未知数个数 = ' + n + '，方程组相容且约束充分。');
+      sol += '<div class="res"><h3>解向量</h3><div class="val">' +
+        x.map(function (v, i) { return 'x' + (i + 1) + ' = ' + fmt(v); }).join('&nbsp;&nbsp;·&nbsp;&nbsp;') +
+        '</div></div>';
+    } else {
+      /* 无穷多解：给出特解与自由变量 */
+      sol = alertBox('warn', '<b>有无穷多解。</b>rank(A) = ' + rankA + ' &lt; 未知数个数 ' + n +
+        '，存在 ' + (n - rankA) + ' 个自由变量。');
+      var free = [];
+      for (var c2 = 0; c2 < n; c2++) if (R.pivots.indexOf(c2) === -1) free.push(c2);
+      var parts = [];
+      for (var i2 = 0; i2 < n; i2++) {
+        var pi = R.pivots.indexOf(i2);
+        if (pi === -1) {
+          parts.push('x' + (i2 + 1) + ' = t' + (free.indexOf(i2) + 1) + '（自由）');
+        } else {
+          var expr = fmt(R.m[pi][n]);
+          free.forEach(function (fc, fi) {
+            var coef = -R.m[pi][fc];
+            if (Math.abs(coef) > 1e-12) expr += (coef >= 0 ? ' + ' : ' − ') + fmt(Math.abs(coef)) + '·t' + (fi + 1);
+          });
+          parts.push('x' + (i2 + 1) + ' = ' + expr);
+        }
+      }
+      sol += '<div class="res"><h3>通解</h3><div style="line-height:2.1;font-family:var(--mono);font-size:.88rem">' +
+        parts.map(function (p) { return esc(p); }).join('<br>') + '</div>' +
+        '<div class="note">t₁、t₂ … 为任意实数。</div></div>';
+    }
+    html += sol;
+    out.innerHTML = html;
+  });
+
+  /* ======================================================================
+   *  工具四 · 微积分
+   * ====================================================================== */
+  /* 复合 Simpson 公式（四阶精度），端点函数值不可用时自动降级为
+     复合中点法 —— 中点法完全不含端点采样，因而能正确处理可去奇点
+     （如 sin(x)/x 在 x=0）与收敛的广义积分（如 1/sqrt(x) 在 x=0）。 */
+  function integrate(f, a, b, n) {
+    if (n % 2) n++;
+    var h = (b - a) / n, bad = 0;
+    function at(x) {
+      var y = f(x);
+      if (typeof y !== 'number' || !isFinite(y)) { bad++; return null; }
+      return y;
+    }
+
+    var fa = at(a), fb = at(b);
+    if (fa !== null && fb !== null) {
+      var s = fa + fb;
+      for (var i = 1; i < n; i++) {
+        var y = at(a + i * h);
+        s += (y === null ? 0 : y) * (i % 2 ? 4 : 2);
+      }
+      return { value: s * h / 3, bad: bad, n: n, h: h, method: 'simpson' };
+    }
+
+    var sum = 0, mbad = 0;
+    for (var k = 0; k < n; k++) {
+      var yk = f(a + (k + 0.5) * h);
+      if (typeof yk !== 'number' || !isFinite(yk)) { mbad++; continue; }
+      sum += yk;
+    }
+    return { value: sum * h, bad: bad + mbad, n: n, h: h, method: 'midpoint' };
+  }
+
+  $('calcGo').addEventListener('click', function () {
+    var out = $('calcOut');
+    var f;
+    try {
+      f = compile($('cf').value.trim());
+    } catch (e) {
+      out.innerHTML = alertBox('err', esc(e.message));
+      return;
+    }
+
+    var html = '<div class="res"><h3>f(x)</h3><div class="val" style="font-size:.95rem">' +
+      esc($('cf').value.trim()) + '</div></div>';
+
+    /* ---- 定积分 ---- */
+    var a = NaN, b = NaN;
+    try {
+      a = compile($('ca').value.trim())(0);
+      b = compile($('cb').value.trim())(0);
+    } catch (e2) {
+      html += '<div class="res"><h3>定积分</h3>' + alertBox('err', '积分上下限有误 —— ' + esc(e2.message)) + '</div>';
+      out.innerHTML = html;
+      return;
+    }
+    if (!isFinite(a) || !isFinite(b)) {
+      html += '<div class="res"><h3>定积分</h3>' + alertBox('err', '积分上下限必须是有限实数。') + '</div>';
+    } else {
+      var r = integrate(f, a, b, 2000);
+      var mdesc = r.method === 'simpson'
+        ? '复合 Simpson 公式（四阶精度）'
+        : '端点处函数值未定义，已自动改用<b>复合中点法</b>（不含端点采样，可正确处理可去奇点）';
+      html += '<div class="res"><h3>定积分 ∫<sub>' + esc(fmt(a)) + '</sub><sup>' + esc(fmt(b)) + '</sup> f(x) dx</h3>' +
+        '<div class="val">' + esc(fmt(r.value)) + '</div>' +
+        '<div class="note">' + mdesc + '，' + r.n + ' 等分，步长 ' + esc(fmt(r.h)) + '。' +
+        (r.bad
+          ? ' <span style="color:var(--warn)">注意：区间内有 ' + r.bad + ' 个采样点函数值未定义（奇点或超出定义域），结果不可信。</span>'
+          : ' 区间内未检出未定义点。') +
+        '</div></div>';
+    }
+
+    /* ---- 数值导数 ---- */
+    var x0 = NaN;
+    try {
+      x0 = compile($('cx').value.trim())(0);
+    } catch (e3) {
+      html += '<div class="res"><h3>数值导数</h3>' + alertBox('err', '求导点有误 —— ' + esc(e3.message)) + '</div>';
+      out.innerHTML = html;
+      return;
+    }
+    var hh = 1e-5 * Math.max(1, Math.abs(x0));
+    var f1 = f(x0 + hh), f2 = f(x0 - hh);
+    if (!isFinite(f1) || !isFinite(f2)) {
+      html += '<div class="res"><h3>数值导数</h3>' +
+        alertBox('warn', '在 x₀ = ' + esc(fmt(x0)) + ' 附近函数值未定义，无法用中心差分估计导数。') + '</div>';
+    } else {
+      var d1 = (f1 - f2) / (2 * hh);
+      /* Richardson 外推：用更小步长再算一次，提升一阶精度 */
+      var h2 = hh / 2;
+      var g1 = f(x0 + h2), g2 = f(x0 - h2);
+      var d2 = (g1 - g2) / (2 * h2);
+      var dR = (4 * d2 - d1) / 3;
+      html += '<div class="res"><h3>数值导数 f′(' + esc(fmt(x0)) + ')</h3>' +
+        '<div class="val">' + esc(fmt(dR)) + '</div>' +
+        '<div class="note">中心差分步长 ' + esc(fmt(hh)) + '，并经 Richardson 外推。' +
+        '中间值：f(x₀) = ' + esc(fmt(f(x0))) + '，一阶差分 ' + esc(fmt(d1)) + '。</div></div>';
+    }
+
+    out.innerHTML = html;
+  });
+
+  /* ======================================================================
+   *  标签页切换
+   * ====================================================================== */
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
+  var panels = Array.prototype.slice.call(document.querySelectorAll('.panel'));
+  tabs.forEach(function (t) {
+    t.addEventListener('click', function () {
+      tabs.forEach(function (x) { x.setAttribute('aria-selected', String(x === t)); });
+      panels.forEach(function (p) { p.classList.toggle('on', p.id === 'panel-' + t.dataset.panel); });
+      if (t.dataset.panel === 'plot') { resizeCanvas(); draw(); }
+    });
+  });
+
+  /* ======================================================================
+   *  示例快捷填充
+   * ====================================================================== */
+  function examples(host, list) {
+    host.innerHTML = list.map(function (e, i) {
+      return '<button class="ex" type="button" data-i="' + i + '">' + esc(e.t) + '</button>';
+    }).join('');
+    host.addEventListener('click', function (ev) {
+      var b = ev.target.closest('.ex');
+      if (b) list[Number(b.dataset.i)].run();
+    });
+    /* 阻止示例按钮抢走回车提交 */
+    host.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') ev.preventDefault(); });
+  }
+
+  examples($('exPlot'), [
+    { t: 'sin(x)/x', run: function () { $('f1').value = 'sin(x)/x'; $('f2').value = ''; doPlot(); } },
+    { t: 'x^3-3x', run: function () { $('f1').value = 'x^3-3x'; $('f2').value = '3x^2-3'; doPlot(); } },
+    { t: 'exp(-x^2)', run: function () { $('f1').value = 'exp(-x^2)'; $('f2').value = ''; doPlot(); } },
+    { t: 'tan(x)', run: function () { $('f1').value = 'tan(x)'; $('f2').value = ''; doPlot(); } },
+    { t: 'ln(x)', run: function () { $('f1').value = 'ln(x)'; $('f2').value = 'sqrt(x)'; doPlot(); } }
+  ]);
+
+  examples($('exMatrix'), [
+    { t: '3×3 可逆', run: function () { $('mA').value = '1 2 3\n4 5 6\n7 8 10'; $('mB').value = '2 0 1\n1 3 2\n0 1 1'; $('matrixGo').click(); } },
+    { t: '奇异矩阵', run: function () { $('mA').value = '1 2 3\n2 4 6\n1 1 1'; $('mB').value = ''; $('matrixGo').click(); } },
+    { t: '非方阵', run: function () { $('mA').value = '1 2 3\n4 5 6'; $('mB').value = ''; $('matrixGo').click(); } }
+  ]);
+
+  examples($('exLinear'), [
+    { t: '唯一解', run: function () { $('linA').value = '1 1 1 6\n0 2 5 -4\n2 5 -1 27'; $('linearGo').click(); } },
+    { t: '无穷多解', run: function () { $('linA').value = '1 2 3 6\n2 4 6 12'; $('linearGo').click(); } },
+    { t: '无解', run: function () { $('linA').value = '1 2 3\n2 4 7'; $('linearGo').click(); } }
+  ]);
+
+  examples($('exCalc'), [
+    { t: 'sin(x)/x 在 [0,π]', run: function () { $('cf').value = 'sin(x)/x'; $('ca').value = '0'; $('cb').value = 'pi'; $('cx').value = '1'; $('calcGo').click(); } },
+    { t: 'exp(-x^2) 在 [-3,3]', run: function () { $('cf').value = 'exp(-x^2)'; $('ca').value = '-3'; $('cb').value = '3'; $('cx').value = '0'; $('calcGo').click(); } },
+    { t: '1/x 跨奇点', run: function () { $('cf').value = '1/x'; $('ca').value = '-1'; $('cb').value = '1'; $('cx').value = '2'; $('calcGo').click(); } }
+  ]);
+
+  /* ======================================================================
+   *  初始化
+   * ====================================================================== */
+  function boot() {
+    resizeCanvas();
+    doPlot();
+    $('matrixGo').click();
+    $('linearGo').click();
+    $('calcGo').click();
+  }
+  window.addEventListener('resize', function () {
+    var p = $('panel-plot');
+    if (p.classList.contains('on')) { resizeCanvas(); draw(); }
+  });
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    setTimeout(boot, 0);
+  } else {
+    document.addEventListener('DOMContentLoaded', boot);
+  }
+  window.addEventListener('load', function () { resizeCanvas(); draw(); });
+
+  /* ------------------------------ 滚动进度线 ------------------------------ */
+  (function scrollProgress() {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var prog = document.getElementById('prog'), tick = false;
+    function upd() {
+      var h = document.documentElement.scrollHeight - window.innerHeight;
+      prog.style.width = (h > 0 ? Math.min(100, window.scrollY / h * 100) : 0) + '%';
+      tick = false;
+    }
+    window.addEventListener('scroll', function () {
+      if (!tick) { tick = true; requestAnimationFrame(upd); }
+    }, { passive: true });
+    upd();
+  })();
+})();
+</script>
+</body>
+</html>
