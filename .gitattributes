@@ -1,0 +1,15 @@
+# 行尾统一为 LF —— 显式覆盖本机 system 级 core.autocrlf=true，
+# 避免换机器克隆后 CRLF 漂移（2026-10-09 首次推送时就踩过：git hash-object 给的是归一后 sha）。
+* text=auto eol=lf
+
+# 二进制文件不做行尾转换（text=auto 通常能自动识别，这里显式钉死以免误判）
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.webp  binary
+*.ico   binary
+*.pdf   binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
