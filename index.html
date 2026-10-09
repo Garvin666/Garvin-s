@@ -944,8 +944,11 @@ html.motion-off .demo:hover .pv{transform:none}
   function setText(id, v) { var el = $(id); if (el && v != null) el.innerHTML = rich(v); }
   function setAttr(id, a, v) { var el = $(id); if (el && v != null) el.setAttribute(a, v); }
   var ICON_ATTR = 'style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"';
-  function icon(id, fill) {
-    return '<svg ' + ICON_ATTR + (fill ? ' style="' + fill + '"' : '') +
+  /* cls：需要 CSS 参与（如 .skill-h .si 提供的 flex:none）时传入，不传则只用内联尺寸。
+     原第二参 fill 从未被任何调用点使用，且与 ICON_ATTR 里的 style 属性重复
+     —— HTML 解析重复属性只认第一个 ⇒ 该参数永远无效，故移除，不留空承诺。 */
+  function icon(id, cls) {
+    return '<svg ' + (cls ? 'class="' + cls + '" ' : '') + ICON_ATTR +
       ' aria-hidden="true"><use href="#i-' + esc(id) + '"/></svg>';
   }
   /* GitHub 语言色：项目卡左侧色条与元信息圆点共用 */
@@ -1096,7 +1099,7 @@ html.motion-off .demo:hover .pv{transform:none}
     $('skillsWrap').innerHTML = groups.map(function (g) {
       var items = g.items || [];
       return '<div class="cell"><div class="skill-h' + (g.icon ? ' has-ic' : '') + '">' +
-          (g.icon ? icon(g.icon) : '') +
+          (g.icon ? icon(g.icon, 'si') : '') +
           '<span class="sl">' + esc(g.label) + '</span>' +
           '<span class="sc">' + items.length + '</span></div>' +
         '<div class="chips">' +
